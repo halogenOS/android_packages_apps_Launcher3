@@ -33,7 +33,7 @@
         android:stateListAnimator="@animator/overview_button_anim"
         android:text="@string/wallpaper_button_text"
         android:textAllCaps="true"
-        android:textColor="@android:color/white"
+        android:textColor="@color/wallpaper_button_text_color"
         android:textSize="12sp" />
 
     <TextView
@@ -48,7 +48,7 @@
         android:stateListAnimator="@animator/overview_button_anim"
         android:text="@string/widget_button_text"
         android:textAllCaps="true"
-        android:textColor="@android:color/white"
+        android:textColor="@color/widget_button_text_color"
         android:textSize="12sp" />
 
     <TextView
@@ -63,7 +63,7 @@
         android:stateListAnimator="@animator/overview_button_anim"
         android:text="@string/settings_button_text"
         android:textAllCaps="true"
-        android:textColor="@android:color/white"
+        android:textColor="@color/settings_button_text_color"
         android:textSize="12sp" />
 
 </LinearLayout>
