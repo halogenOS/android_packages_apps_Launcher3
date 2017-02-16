@@ -60,7 +60,8 @@
         android:label="@string/derived_app_name"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
-        android:supportsRtl="true" >
+        android:supportsRtl="true"
+	android:directBootAware="true" >
 
         <!--
         Main launcher activity. When extending only change the name, and keep all the

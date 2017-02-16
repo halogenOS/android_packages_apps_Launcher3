@@ -252,7 +252,8 @@ public class QsbContainerView extends FrameLayout {
     public static AppWidgetProviderInfo getSearchWidgetProvider(Context context) {
         SearchManager searchManager =
                 (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
-        ComponentName searchComponent = searchManager.getGlobalSearchActivity();
+        //Do not call getGlobalSearchActivity() to prevent  (java.lang.IllegalStateException: User 0 isn't unlocked)
+	ComponentName searchComponent = null;/*searchManager.getGlobalSearchActivity();*/
         if (searchComponent == null) return null;
         String providerPkg = searchComponent.getPackageName();
 
