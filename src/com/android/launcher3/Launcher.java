@@ -999,7 +999,11 @@ public class Launcher extends Activity
         }
 
         if (Utilities.isNycMR1OrAbove()) {
-            mAppWidgetHost.startListening();
+            try {
+                mAppWidgetHost.startListening();
+            } catch (java.lang.IllegalStateException e) {
+                Log.e(TAG, "Suppresed IllegalStateException");
+            }
         }
     }
 
