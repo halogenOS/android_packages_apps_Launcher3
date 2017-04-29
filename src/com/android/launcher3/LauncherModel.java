@@ -1601,18 +1601,9 @@ public class LauncherModel extends BroadcastReceiver
 
                 waitForIdle();
 
-		//Delay loadAndBindDeepShortcuts() to prevent (java.lang.IllegalStateException: User 0 isn't unlocked) for API>=25
-		final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-		       @Override
-		       public void run() {
-		               Log.v(TAG, "loadAndBindDeepShortcuts BEGIN");
-		               // third step
-			       if (DEBUG_LOADERS) Log.d(TAG, "step 3: loading deep shortcuts");
-			       loadAndBindDeepShortcuts();
-		               Log.v(TAG, "loadAndBindDeepShortcuts END");
-			}
-		}, 3000);
+                // third step
+                if (DEBUG_LOADERS) Log.d(TAG, "step 3: loading deep shortcuts");
+                loadAndBindDeepShortcuts();
             }
 
             // Clear out this reference, otherwise we end up holding it until all of the

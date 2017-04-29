@@ -143,9 +143,6 @@ import java.util.Map;
 
 import com.qti.launcherunreadservice.IGetUnreadNumber;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Default launcher application.
  */
@@ -453,17 +450,7 @@ public class Launcher extends Activity
         mAppWidgetManager = AppWidgetManagerCompat.getInstance(this);
 
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
-
-	//Delay startListening() to prevent (java.lang.IllegalStateException: User 0 isn't unlocked)
-	Timer ttask = new Timer();
-	ttask.schedule(new TimerTask() {
-		@Override
-		public void run() {
-			Log.v(TAG, "mAppWidgetHost.startListening BEGIN");
-			mAppWidgetHost.startListening();
-			Log.v(TAG, "mAppWidgetHost.startListening END");
-		}
-	}, 3000);
+        mAppWidgetHost.startListening();
 
         // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
         // this also ensures that any synchronous binding below doesn't re-trigger another
@@ -1012,16 +999,7 @@ public class Launcher extends Activity
         }
 
         if (Utilities.isNycMR1OrAbove()) {
-		//Delay startListening() to prevent (java.lang.IllegalStateException: User 0 isn't unlocked)
-		Timer ptask = new Timer();
-		ptask.schedule(new TimerTask() {
-		@Override
-			public void run() {
-				Log.v(TAG, "mAppWidgetHost.startListening BEGIN");
-				mAppWidgetHost.startListening();
-				Log.v(TAG, "mAppWidgetHost.startListening END");
-			}
-		}, 3000);
+            mAppWidgetHost.startListening();
         }
     }
 
