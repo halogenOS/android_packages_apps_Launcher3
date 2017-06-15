@@ -452,7 +452,9 @@ public class IconCache {
                 false, useLowResIcon, application.unreadNum);
         application.title = Utilities.trim(entry.title);
         application.contentDescription = entry.contentDescription;
-        application.iconBitmap = getNonNullIcon(entry, user);
+        IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+        Drawable icon = iconPack == null ? null : iconPack.getIcon(application.componentName);
+        application.iconBitmap = icon == null ? getNonNullIcon(entry, user) : Utilities.createIconBitmap(icon, mContext);
         application.usingLowResIcon = entry.isLowResIcon;
     }
 
@@ -465,7 +467,9 @@ public class IconCache {
         if (entry.icon != null && !isDefaultIcon(entry.icon, application.user)) {
             application.title = Utilities.trim(entry.title);
             application.contentDescription = entry.contentDescription;
-            application.iconBitmap = entry.icon;
+            IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+            Drawable icon = iconPack == null ? null : iconPack.getIcon(application.componentName);
+            application.iconBitmap = icon == null ? entry.icon : Utilities.createIconBitmap(icon, mContext);
             application.usingLowResIcon = entry.isLowResIcon;
         }
     }
@@ -515,7 +519,11 @@ public class IconCache {
             UserHandleCompat user, boolean usePkgIcon, boolean useLowResIcon) {
         CacheEntry entry = cacheLocked(component, info, user, usePkgIcon, useLowResIcon,
                 getUnreadNumber(component));
-        shortcutInfo.setIcon(getNonNullIcon(entry, user));
+        CacheEntry entry = cacheLocked(component, info, user, usePkgIcon, useLowResIcon);
+        IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+        Drawable icon = iconPack == null ? null : iconPack.getIcon(component);
+        Bitmap iBitmap = icon == null ? getNonNullIcon(entry, user) : Utilities.createIconBitmap(icon, mContext);
+        shortcutInfo.setIcon(iBitmap);
         shortcutInfo.title = Utilities.trim(entry.title);
         shortcutInfo.contentDescription = entry.contentDescription;
         shortcutInfo.usingFallbackIcon = isDefaultIcon(entry.icon, user);
