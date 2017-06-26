@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.view.MenuItem;
@@ -49,8 +48,6 @@ public class SettingsActivity extends Activity {
      */
     public static class LauncherSettingsFragment extends PreferenceFragment {
 
-        private Preference mIconPack;
-
         private SystemDisplayRotationLockObserver mRotationLockObserver;
 
         @Override
@@ -58,8 +55,6 @@ public class SettingsActivity extends Activity {
             super.onCreate(savedInstanceState);
             getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             addPreferencesFromResource(R.xml.launcher_preferences);
-
-            mIconPack = (Preference) findPreference(Utilities.KEY_ICON_PACK);
 
             // Setup allow rotation preference
             Preference rotationPref = findPreference(Utilities.ALLOW_ROTATION_PREFERENCE_KEY);
@@ -80,16 +75,6 @@ public class SettingsActivity extends Activity {
                 mRotationLockObserver.onChange(true);
                 rotationPref.setDefaultValue(Utilities.getAllowRotationDefaultValue(getActivity()));
             }
-        }
-
-        @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference pref) {
-            if (pref == mIconPack) {
-                IconCache.getIconsHandler(getActivity().getApplicationContext())
-                        .showDialog(getActivity());
-                return true;
-            }
-            return false;
         }
 
         @Override
