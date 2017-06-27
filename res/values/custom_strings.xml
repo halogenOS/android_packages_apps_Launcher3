@@ -22,4 +22,5 @@
     <string name="show_predictive_apps_title">Predictive apps</string>
     <string name="icon_pack">Icon Pack</string>
     <string name="icon_pack_summary">Select an icon Pack</string>
+    <string name="default_iconpack_title">Default icons</string>
 </resources>
