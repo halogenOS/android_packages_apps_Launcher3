@@ -259,4 +259,7 @@
     <!-- Accessibility description for the shortcuts menu shown for an app. -->
     <string name="shortcuts_menu_description"><xliff:g id="number_of_shortcuts" example="3">%1$d</xliff:g> shortcuts for <xliff:g id="app_name" example="Messenger">%2$s</xliff:g></string>
 
+    <!-- Folder titles -->
+    <string name="google_title" translatable="false">Google</string>
+    <string name="play_folder_title">Play</string>
 </resources>
