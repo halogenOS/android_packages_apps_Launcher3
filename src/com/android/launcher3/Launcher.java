@@ -1321,7 +1321,7 @@ public class Launcher extends Activity
                 if (mState == State.WORKSPACE && !mWorkspace.isInOverviewMode() &&
                         !mWorkspace.isSwitchingState()) {
                     mOverviewPanel.requestFocus();
-                    showOverviewMode(true, true /* requestButtonFocus */);
+                    showOverviewMode(true, false /* requestButtonFocus */);
                 }
             }
             return true;
