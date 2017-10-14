@@ -1,0 +1,19 @@
+    private class RotationPrefChangeHandler implements OnSharedPreferenceChangeListener {
+
+        @Override
+        public void onSharedPreferenceChanged(
+                SharedPreferences sharedPreferences, String key) {
+            if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
+                // Finish this instance of the activity. When the activity is recreated,
+                // it will initialize the rotation preference again.
+                finish();
+            }
+            if (Utilities.ICON_PACK_PREFERENCE_KEY.equals(key) || Utilities.ADAPTIVE_ICONS_PREFERENCE_KEY.equals(key)
+                    || Utilities.LEGACY_ICON_PREFERENCE_KEY.equals(key) || Utilities.ICON_SHAPE_PREFERENCE_KEY.equals(key)
+                    || Utilities.ICON_SHADOW_PREFERENCE_KEY.equals(key)) {
+                mModel.clearIconCache();
+                mModel.forceReload();
+                mOnResumeNeedsLoad = true;
+            }
+        }
+    }
