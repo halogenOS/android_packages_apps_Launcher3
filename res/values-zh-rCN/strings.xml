@@ -105,4 +105,7 @@
     <string name="action_deep_shortcut" msgid="2864038805849372848">"快捷方式"</string>
     <string name="shortcuts_menu_description" msgid="406159963824238648">"<xliff:g id="APP_NAME">%2$s</xliff:g>有 <xliff:g id="NUMBER_OF_SHORTCUTS">%1$d</xliff:g> 个快捷方式"</string>
     <string name="search_bar_title">显示搜索栏</string>
+    <!-- Icon pack -->
+    <string name="default_iconpack_title">默认图标</string>
+    <string name="icons_pack_name">切换图标包</string>
 </resources>
