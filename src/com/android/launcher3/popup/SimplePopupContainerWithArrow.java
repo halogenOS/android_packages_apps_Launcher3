@@ -545,17 +545,4 @@ public class SimplePopupContainerWithArrow extends AbstractFloatingView implemen
             setY(y);
         }
     }
-
-    public static SimplePopupContainerWithArrow showForTopWidget(final View parentView, final PointF location, Launcher launcher) {
-        List<SystemShortcut> systemShortcuts = new ArrayList<SystemShortcut>();
-        systemShortcuts.add(new SystemShortcut.WeatherSettings());
-
-        final SimplePopupContainerWithArrow container =
-                (SimplePopupContainerWithArrow) launcher.getLayoutInflater().inflate(
-                        R.layout.simple_popup_container, launcher.getDragLayer(), false);
-        container.setVisibility(View.INVISIBLE);
-        launcher.getDragLayer().addView(container);
-        container.populateAndShow(parentView, location, systemShortcuts);
-        return container;
-    }
 }

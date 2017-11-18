@@ -34,11 +34,5 @@
             android:layout_weight="1"
             android:layout_gravity="center" />
 
-        <LinearLayout
-            android:id="@+id/current_weather_view_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
-
     </LinearLayout>
 </com.android.launcher3.topwidget.TopWidgetView>

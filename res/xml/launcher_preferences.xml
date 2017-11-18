@@ -145,11 +145,6 @@
             android:defaultValue="true"
             android:persistent="true" />
 
-        <ListPreference
-            android:key="pref_weatherIconPack"
-            android:title="@string/weather_icon_pack_title"
-            android:persistent="true" />
-
         <SwitchPreference
             android:key="pref_allDayEvents"
             android:title="@string/pref_allDayEvents_title"

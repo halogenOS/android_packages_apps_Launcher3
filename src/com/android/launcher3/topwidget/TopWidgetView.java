@@ -35,7 +35,6 @@ public class TopWidgetView extends FrameLayout {
     private static final String TAG = "Launcher3:TopWidgetView";
     private static final boolean DEBUG = false;
     private CalendarView mCalendarView;
-    private CurrentWeatherView mWeatherView;
     private LayoutInflater mInflater;
 
     public TopWidgetView(Context context) {
@@ -54,9 +53,6 @@ public class TopWidgetView extends FrameLayout {
         if (mCalendarView != null) {
             mCalendarView.updateSettings();
         }
-        if (mWeatherView != null) {
-            mWeatherView.updateSettings();
-        }
     }
 
     public void checkPermissions() {
@@ -74,22 +70,16 @@ public class TopWidgetView extends FrameLayout {
     public void updateTopWidgetVisibility(boolean visible) {
         setVisibility(visible ? View.VISIBLE : View.GONE);
         if (!visible) {
-            if (mCalendarView != null && mWeatherView != null) {
+            if (mCalendarView != null) {
                 LinearLayout v = (LinearLayout) findViewById(R.id.calendar_view_container);
                 v.removeAllViews();
-                v = (LinearLayout) findViewById(R.id.current_weather_view_container);
-                v.removeAllViews();
                 mCalendarView = null;
-                mWeatherView = null;
             }
         } else {
-            if (mCalendarView == null && mWeatherView == null) {
+            if (mCalendarView == null) {
                 mCalendarView = (CalendarView) mInflater.inflate(R.layout.calendar_view, null);
                 LinearLayout v = (LinearLayout) findViewById(R.id.calendar_view_container);
                 v.addView(mCalendarView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                mWeatherView = (CurrentWeatherView) mInflater.inflate(R.layout.current_weather_view, null);
-                v = (LinearLayout) findViewById(R.id.current_weather_view_container);
-                v.addView(mWeatherView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             }
         }
     }

@@ -134,7 +134,6 @@ public final class Utilities {
     public static final String SHOW_TOP_WIDGET_PREFERENCE_KEY = "pref_topWidget";
     public static final String SHOW_HOTSEAT_BG_PREFERENCE_KEY = "pref_hotSeatBgColor";
     public static final String SHOW_HOTSEAT_PREFERENCE_KEY = "pref_hotSeat";
-    public static final String WEATHER_ICON_PACK_PREFERENCE_KEY = "pref_weatherIconPack";
     public static final String SHOW_ALL_DAY_EVENTS_PREFERENCE_KEY = "pref_allDayEvents";
     public static final String SHOW_EVENTS_PERIOD_PREFERENCE_KEY = "pref_showEventsPeriod";
     public static final String SHOW_TODAY_PREFERENCE_KEY = "pref_showToday";
@@ -182,10 +181,6 @@ public final class Utilities {
 
     public static boolean isShowHotseat(Context context) {
         return getPrefs(context).getBoolean(SHOW_HOTSEAT_PREFERENCE_KEY, true);
-    }
-
-    public static String getWeatherIconPack(Context context) {
-        return getPrefs(context).getString(WEATHER_ICON_PACK_PREFERENCE_KEY, null);
     }
 
     public static boolean isShowAllDayEvents(Context context) {
