@@ -320,6 +320,8 @@ public class Workspace extends PagedView
     private float mOverlayTranslation;
     private int mFirstPageScrollX;
 
+    private CellLayout.LayoutParams mLp;
+
     // Handles workspace state transitions
     private WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
@@ -641,11 +643,11 @@ public class Workspace extends PagedView
             });
         }
 
-        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, firstPage.getCountX(), 1);
-        lp.canReorder = false;
+        mLp = new CellLayout.LayoutParams(0, 0, firstPage.getCountX(), 1);
+        mLp.canReorder = false;
         View topContainer = mLauncher.getTopContainer();
         ((ViewGroup) topContainer.getParent()).removeView(topContainer);
-        if (!firstPage.addViewToCellLayout(topContainer, 0, R.id.top_container, lp, Utilities.isTopSpaceReserved(mLauncher))) {
+        if (!firstPage.addViewToCellLayout(topContainer, 0, R.id.top_container, mLp, Utilities.isTopSpaceReserved(mLauncher))) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
         }
     }
@@ -4243,8 +4245,12 @@ public class Workspace extends PagedView
         CellLayout firstPage = mWorkspaceScreens.get(FIRST_SCREEN_ID);
         if (!visible) {
             firstPage.markCellsAsUnoccupiedForView(mLauncher.getTopContainer());
+            ((ViewGroup) mLauncher.getTopContainer().getParent()).removeView(mLauncher.getTopContainer());
         } else {
-            firstPage.markCellsAsOccupiedForView(mLauncher.getTopContainer());
+            if (mLauncher.getTopContainer().getParent() != null) {
+                ((ViewGroup) mLauncher.getTopContainer().getParent()).removeView(mLauncher.getTopContainer());
+            }
+            firstPage.addViewToCellLayout(mLauncher.getTopContainer(), 0, R.id.top_container, mLp, Utilities.isTopSpaceReserved(mLauncher));
         }
     }
 }
