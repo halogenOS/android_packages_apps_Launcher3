@@ -70,7 +70,6 @@
     <string name="hide_app_sum">Hide apps from the app drawer</string>
     <string name="hide_app_selected">&#160;selected</string>
     <string name="hidden_app">All apps</string>
-    <string name="hide_selected">Hide selected app(s)</string>
     <string name="more">More</string>
 
 </resources>
