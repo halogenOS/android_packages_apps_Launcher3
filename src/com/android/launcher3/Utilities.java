@@ -53,6 +53,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.config.ProviderConfig;
+import static com.android.launcher3.util.PackageManagerHelper.isAppEnabled;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -143,6 +144,48 @@ public final class Utilities {
     public static final String TOP_PREDICTIVE_APPS_KEY = "top_predictive_apps";
     static final String KEY_HIDDEN_APPS = "hidden_app";
     static final String KEY_HIDDEN_APPS_SET = "hidden_app_set";
+
+    // Blacklisted APKs which will be hidden, these include simple regex formatting, without
+    // full regex formatting (e.g. com.android. will block everything that starts with com.android.)
+    // Taken from: https://github.com/substratum/template/blob/kt-n/app/src/main/kotlin/substratum/theme/template/Constants.kt
+    private static final String[] BLACKLISTED_PACKAGES = {
+            "cc.madkite.freedom",
+            "zone.jasi2169.uretpatcher",
+            "uret.jasi2169.patcher",
+            "p.jasi2169.al3",
+            "com.dimonvideo.luckypatcher",
+            "com.chelpus.lackypatch",
+            "com.forpda.lp",
+            "com.android.vending.billing.InAppBillingService.LOCK",
+            "com.android.vending.billing.InAppBillingService.LACK",
+            "com.android.vending.billing.InAppBillingService.LUCK",
+            "com.android.vending.billing.InAppBillingService.CRAC",
+            "com.android.vending.billing.InAppBillingService.CLON",
+            "com.android.vendinc",
+            "com.appcake",
+            "ac.market.store",
+            "org.sbtools.gamehack",
+            "com.zune.gamekiller",
+            "com.aag.killer",
+            "com.killerapp.gamekiller",
+            "cn.lm.sq",
+            "net.schwarzis.game_cih",
+            "org.creeplays.hack",
+            "com.baseappfull.fwd",
+            "com.zmapp",
+            "com.dv.marketmod.installer",
+            "org.mobilism.android",
+            "com.blackmartalpha",
+            "org.blackmart.market"
+    };
+
+    public static boolean isBlacklistedAppInstalled(Context context) {
+        PackageManager pm = context.getPackageManager();
+        for (String packageName : BLACKLISTED_PACKAGES) {
+            if (isAppEnabled(pm, packageName, 0)) return true;
+        }
+        return false;
+    }
 
     public static boolean isPropertyEnabled(String propertyName) {
         return Log.isLoggable(propertyName, Log.VERBOSE);

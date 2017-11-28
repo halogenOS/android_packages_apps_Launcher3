@@ -72,4 +72,6 @@
     <string name="hidden_app">All apps</string>
     <string name="more">More</string>
 
+    <string name="unauthorized_device">This device has a few piracy tools installed. Please uninstall them to continue.</string>
+
 </resources>

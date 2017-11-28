@@ -18,6 +18,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,11 +28,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.android.launcher3.R;
-
+import com.android.launcher3.Utilities;
 
 public class IconPackPreference extends Preference {
 
     private final PackageManager pm;
+    private final Context mContext;
 
     public IconPackPreference(Context context) {
         this(context, null);
@@ -43,6 +45,7 @@ public class IconPackPreference extends Preference {
 
     public IconPackPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mContext = context;
         setLayoutResource(R.layout.preference_iconpack);
         pm = context.getPackageManager();
     }
@@ -77,6 +80,10 @@ public class IconPackPreference extends Preference {
     @Override
     protected void onClick() {
         super.onClick();
+        if (Utilities.isBlacklistedAppInstalled(mContext)) {
+            Toast.makeText(mContext, R.string.unauthorized_device, Toast.LENGTH_SHORT).show();
+            return;
+        }
         showDialog();
     }
 

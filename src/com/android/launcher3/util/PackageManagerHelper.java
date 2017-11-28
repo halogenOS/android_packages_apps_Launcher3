@@ -69,6 +69,15 @@ public class PackageManagerHelper {
         return info != null && isAppSuspended(info);
     }
 
+    public static boolean isAppEnabled(PackageManager pm, String packageName, int flags) {
+        try {
+            ApplicationInfo info = pm.getApplicationInfo(packageName, flags);
+            return info != null && info.enabled;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     public boolean isSafeMode() {
         return mContext.getPackageManager().isSafeMode();
     }
