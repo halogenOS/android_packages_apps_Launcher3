@@ -22,6 +22,7 @@ import com.android.launcher3.LauncherAnimUtils;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.util.Themes;
@@ -260,7 +261,7 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
         // Use a light status bar (dark icons) if all apps is behind at least half of the status
         // bar. If the status bar is already light due to wallpaper extraction, keep it that way.
         boolean forceLight = shift <= mStatusBarHeight / 2;
-        mLauncher.activateLightSystemBars(forceLight, true /* statusBar */, true /* navBar */);
+        mLauncher.activateLightSystemBars(forceLight, FeatureFlags.LIGHT_STATUS_BAR /* statusBar */, true /* navBar */);
     }
 
     /**
