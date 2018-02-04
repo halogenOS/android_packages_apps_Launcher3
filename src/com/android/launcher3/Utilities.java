@@ -709,4 +709,8 @@ public final class Utilities {
             android.os.Process.killProcess(android.os.Process.myPid());
         });
     }
+    public static boolean isWorkspaceEditAllowed(Context context) {
+        SharedPreferences prefs = getPrefs(context.getApplicationContext());
+        return prefs.getBoolean(InvariantDeviceProfile.KEY_WORKSPACE_EDIT, true);
+    }
 }
