@@ -330,6 +330,16 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
                             }
                     );
                     return !info.isTablet(info.realBounds);
+                case KEY_TRUST_APPS:
+                    preference.setOnPreferenceClickListener(p -> {
+                        Utilities.showLockScreen(getActivity(),
+                                getString(R.string.trust_apps_manager_name), () -> {
+                            Intent intent = new Intent(getActivity(), TrustAppsActivity.class);
+                            startActivity(intent);
+                        });
+                        return true;
+                    });
+                    return true;
             }
             return true;
         }
