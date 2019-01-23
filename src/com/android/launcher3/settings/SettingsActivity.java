@@ -57,6 +57,8 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
+import com.android.launcher3.lineage.trust.TrustAppsActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SettingsCache;
@@ -71,6 +73,8 @@ public class SettingsActivity extends FragmentActivity
     static final String DEVELOPER_OPTIONS_KEY = "pref_developer_options";
 
     public static final String FIXED_LANDSCAPE_MODE = "pref_fixed_landscape_mode";
+
+    public static final String KEY_TRUST_APPS = "pref_trust_apps";
 
     private static final String NOTIFICATION_DOTS_PREFERENCE_KEY = "pref_icon_badging";
 
@@ -333,6 +337,17 @@ public class SettingsActivity extends FragmentActivity
                             }
                     );
                     return !info.isTablet(info.realBounds);
+
+                case KEY_TRUST_APPS:
+                    preference.setOnPreferenceClickListener(p -> {
+                        Utilities.showLockScreen(getActivity(),
+                                getString(R.string.trust_apps_manager_name), () -> {
+                            Intent intent = new Intent(getActivity(), TrustAppsActivity.class);
+                            startActivity(intent);
+                        });
+                        return true;
+                    });
+                    return true;
             }
             return true;
         }
