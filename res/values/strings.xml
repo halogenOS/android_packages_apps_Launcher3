@@ -348,11 +348,13 @@
     <!-- content description for paused work apps list -->
     <string name="work_apps_paused_content_description">Work profile is paused. Work apps can\’t send you notifications, use your battery, or access your location</string>
 
-
-
     <!-- A tip shown pointing at work toggle -->
     <string name="work_switch_tip">Pause work apps and notifications</string>
 
     <!-- Failed action error message: e.g. Failed: Pause -->
     <string name="remote_action_failed">Failed: <xliff:g id="what" example="Pause">%1$s</xliff:g></string>
+
+    <!-- Show labels on icon -->
+    <string name="desktop_show_qsb_title">Quick Search Bar</string>
+    <string name="desktop_show_qsb_summary">Show quick search bar on homescreen</string>
 </resources>

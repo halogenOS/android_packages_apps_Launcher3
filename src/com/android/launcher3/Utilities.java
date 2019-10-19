@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ICON_BADGED;
+import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
@@ -118,6 +119,10 @@ public final class Utilities {
 
     public static final boolean ATLEAST_OREO =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+
+    public static final String DESKTOP_SHOW_QSB = "pref_desktop_show_qsb";
+
+    private static final long WAIT_BEFORE_RESTART = 250;
 
     /**
      * Set on a motion event dispatched from the nav bar. See {@link MotionEvent#setEdgeFlags(int)}.
@@ -690,5 +695,20 @@ public final class Utilities {
         public int getIntrinsicWidth() {
             return mSize;
         }
+    }
+
+    public static boolean showDesktopQsb(Context context) {
+        return getPrefs(context).getBoolean(DESKTOP_SHOW_QSB, true);
+    }
+
+    public static void restart(final Context context) {
+        //ProgressDialog.show(context, null, context.getString(R.string.state_loading), true, false);
+        MODEL_EXECUTOR.execute(() -> {
+            try {
+                Thread.sleep(WAIT_BEFORE_RESTART);
+            } catch (Exception ignored) {
+            }
+            android.os.Process.killProcess(android.os.Process.myPid());
+        });
     }
 }

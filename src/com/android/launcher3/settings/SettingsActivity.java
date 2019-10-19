@@ -34,11 +34,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
+import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback;
 import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartScreenCallback;
 import androidx.preference.PreferenceGroup.PreferencePositionCallback;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.LauncherFiles;
@@ -153,6 +155,14 @@ public class SettingsActivity extends FragmentActivity
                     screen.removePreference(preference);
                 }
             }
+
+            SwitchPreference desktopShowQsb = (SwitchPreference) findPreference(Utilities.DESKTOP_SHOW_QSB);
+            desktopShowQsb.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Utilities.restart(getActivity());
+                    return true;
+                }
+            });
         }
 
         @Override
