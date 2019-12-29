@@ -93,22 +93,27 @@ public class PredictionAppTracker extends AppLaunchTracker {
 
     @WorkerThread
     private AppPredictor createPredictor(Client client, int count) {
-        AppPredictionManager apm = mContext.getSystemService(AppPredictionManager.class);
+        try {
+            AppPredictionManager apm = mContext.getSystemService(AppPredictionManager.class);
 
-        if (apm == null) {
-          return null;
+            if (apm == null) {
+                return null;
+            }
+
+            AppPredictor predictor = apm.createAppPredictionSession(
+                    new AppPredictionContext.Builder(mContext)
+                    .setUiSurface(client.id)
+                    .setPredictedTargetCount(count)
+                    .setExtras(getAppPredictionContextExtras(client))
+                    .build());
+            predictor.registerPredictionUpdates(mContext.getMainExecutor(),
+                    PredictionUiStateManager.INSTANCE.get(mContext).appPredictorCallback(client));
+            predictor.requestPredictionUpdate();
+            return predictor;
+
+        } catch (Exception e) {
+            return null;
         }
-
-        AppPredictor predictor = apm.createAppPredictionSession(
-                new AppPredictionContext.Builder(mContext)
-                        .setUiSurface(client.id)
-                        .setPredictedTargetCount(count)
-                        .setExtras(getAppPredictionContextExtras(client))
-                        .build());
-        predictor.registerPredictionUpdates(mContext.getMainExecutor(),
-                PredictionUiStateManager.INSTANCE.get(mContext).appPredictorCallback(client));
-        predictor.requestPredictionUpdate();
-        return predictor;
     }
 
     /**
