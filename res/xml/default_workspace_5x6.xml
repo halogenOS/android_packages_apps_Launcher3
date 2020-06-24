@@ -17,7 +17,7 @@
 <favorites xmlns:launcher="http://schemas.android.com/apk/res-auto/com.android.launcher3">
 
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
-    <!-- Dialer, Messaging, [Maps/Music], Browser, Camera -->
+    <!-- Dialer, Signal/Messaging, K-9Mail/Contacts, DuckDuckGo/Chromium, Camera -->
     <resolve
         launcher:container="-101"
         launcher:screen="0"
@@ -33,6 +33,7 @@
         launcher:screen="1"
         launcher:x="1"
         launcher:y="0" >
+        <favorite launcher:packageName="org.thoughtcrime.securesms" launcher:className="org.thoughtcrime.securesms.RoutingActivity" />
         <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MESSAGING;end" />
         <favorite launcher:uri="sms:" />
         <favorite launcher:uri="smsto:" />
@@ -45,6 +46,7 @@
         launcher:screen="2"
         launcher:x="2"
         launcher:y="0" >
+        <favorite launcher:packageName="com.fsck.k9" launcher:className="com.fsck.k9.activity.Accounts" />
         <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CONTACTS;end" />
     </resolve>
 
@@ -53,7 +55,9 @@
         launcher:screen="3"
         launcher:x="3"
         launcher:y="0" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end" />
+        <favorite launcher:packageName="com.duckduckgo.mobile.android" launcher:className="com.duckduckgo.app.launch.Launcher" />
+        <favorite
+            launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end" />
         <favorite launcher:uri="http://www.example.com/" />
     </resolve>
 
@@ -66,106 +70,48 @@
         <favorite launcher:uri="#Intent;action=android.intent.action.CAMERA_BUTTON;end" />
     </resolve>
 
-    <!-- Screen 0 -->
+    <!-- Search widget shown at the top, provided by the browser -->
+    <!-- <resolve> doesn't work for appwidgets so just put them both here, the first installed app wins -->
     <appwidget
-        launcher:packageName="com.google.android.googlequicksearchbox"
-        launcher:className="com.google.android.googlequicksearchbox.SearchWidgetProvider"
         launcher:screen="0"
         launcher:x="0"
         launcher:y="0"
         launcher:spanX="5"
-        launcher:spanY="1" />
+        launcher:spanY="1"
+        launcher:packageName="com.duckduckgo.mobile.android"
+        launcher:className="com.duckduckgo.widget.SearchWidget"
+        launcher:appWidgetId="-1" />
 
     <appwidget
-        launcher:packageName="com.android.deskclock"
-        launcher:className="com.android.alarmclock.DigitalAppWidgetProvider"
         launcher:screen="0"
         launcher:x="0"
-        launcher:y="1"
+        launcher:y="0"
         launcher:spanX="5"
-        launcher:spanY="2" />
+        launcher:spanY="1"
+        launcher:packageName="org.chromium.chrome"
+        launcher:className="org.chromium.chrome.browser.searchwidget.SearchWidgetProvider"
+        launcher:appWidgetId="-1" />
 
-    <!-- Google Folder -->
-    <!-- Google, Gmail, Maps, YouTube, Drive, YouTube Music, Play Movies, Duo, Photos -->
-    <folder
-        launcher:title="@string/google_folder_title"
+    <!-- Bottom Row: CalyxVPN, TorBrowser, AuroraStore, F-Droid -->
+    <favorite
         launcher:screen="0"
         launcher:x="0"
-        launcher:y="5">
-        <favorite
-            launcher:packageName="com.google.android.googlequicksearchbox"
-            launcher:className="com.google.android.googlequicksearchbox.SearchActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.gm"
-            launcher:className="com.google.android.gm.ConversationListActivityGmail"/>
-        <favorite
-            launcher:packageName="com.google.android.apps.maps"
-            launcher:className="com.google.android.maps.MapsActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.youtube"
-            launcher:className="com.google.android.youtube.app.honeycomb.Shell$HomeActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.apps.docs"
-            launcher:className="com.google.android.apps.docs.app.NewMainProxyActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.apps.youtube.music"
-            launcher:className="com.google.android.apps.youtube.music.activities.MusicActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.videos"
-            launcher:className="com.google.android.youtube.videos.EntryPoint"/>
-        <favorite
-            launcher:packageName="com.google.android.apps.tachyon"
-            launcher:className="com.google.android.apps.tachyon.MainActivity"/>
-        <favorite
-            launcher:packageName="com.google.android.apps.photos"
-            launcher:className="com.google.android.apps.photos.home.HomeActivity"/>
-    </folder>
+        launcher:y="-1"
+        launcher:packageName="org.calyxinstitute.vpn"
+        launcher:className="se.leap.bitmaskclient.base.StartActivity" />
+
+    <favorite
+        launcher:screen="0"
+        launcher:x="1"
+        launcher:y="-1"
+        launcher:packageName="org.torproject.torbrowser"
+        launcher:className="org.mozilla.gecko.BrowserApp" />
 
     <favorite
         launcher:screen="0"
         launcher:x="4"
-        launcher:y="5"
-        launcher:packageName="com.android.vending"
-        launcher:className="com.android.vending.AssetBrowserActivity"/>
-
-    <!-- Screen 1 -->
-    <appwidget
-        launcher:packageName="org.lineageos.eleven"
-        launcher:className="org.lineageos.eleven.appwidgets.AppWidgetLarge"
-        launcher:screen="1"
-        launcher:x="0"
-        launcher:y="0"
-        launcher:spanX="5"
-        launcher:spanY="2" />
-
-    <resolve
-        launcher:screen="1"
-        launcher:x="0"
-        launcher:y="-1" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_EMAIL;end" />
-        <favorite launcher:uri="mailto:" />
-    </resolve>
-
-    <resolve
-        launcher:screen="1"
-        launcher:x="1"
-        launcher:y="-1" >
-        <favorite launcher:uri="#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_GALLERY;end" />
-        <favorite launcher:uri="#Intent;type=images/*;end" />
-    </resolve>
-
-    <favorite
-        launcher:packageName="org.lineageos.eleven"
-        launcher:className="org.lineageos.eleven.ui.activities.HomeActivity"
-        launcher:screen="1"
-        launcher:x="2"
-        launcher:y="-1" />
-
-    <favorite
-        launcher:packageName="com.android.settings"
-        launcher:className="com.android.settings.Settings"
-        launcher:screen="1"
-        launcher:x="3"
-        launcher:y="-1" />
+        launcher:y="-1"
+        launcher:packageName="org.fdroid.fdroid"
+        launcher:className="org.fdroid.fdroid.views.main.MainActivity" />
 
 </favorites>
