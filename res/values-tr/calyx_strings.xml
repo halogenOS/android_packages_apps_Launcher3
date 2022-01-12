@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paused_apps_dialog_title">Uygulama duraklatıldı</string>
+    <string name="paused_apps_dialog_message">%1$s doğrudan başlatıcıdan duraklatıldı</string>
+    <string name="paused_apps_drop_target_label">Uygulamayı duraklat</string>
+    <string name="pause">Duraklat</string>
+    <string name="pause_apps_dialog_title">%1$s duraklatılsın mı\?</string>
+    <string name="pause_apps_dialog_message">%1$s için bildirimler duraklatılacak</string>
+</resources>

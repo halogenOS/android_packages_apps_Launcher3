@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Dừng</string>
+    <string name="pause_apps_dialog_title">Dừng %1$s\?</string>
+    <string name="pause_apps_dialog_message">Thông báo về %1$s sẽ được tạm dừng</string>
+    <string name="paused_apps_dialog_message">%1$s đã bị dừng trực tiếp từ ứng dụng trang chủ</string>
+    <string name="paused_apps_drop_target_label">Dừng ứng dụng</string>
+    <string name="paused_apps_dialog_title">Ứng dụng đã dừng</string>
+</resources>

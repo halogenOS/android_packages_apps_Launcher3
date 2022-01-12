@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Pause</string>
+    <string name="pause_apps_dialog_title">Sett %1$s på pause\?</string>
+    <string name="paused_apps_drop_target_label">Sett programmet på pause</string>
+    <string name="paused_apps_dialog_message">%1$s ble satt på pause direkte fra oppstarteren</string>
+    <string name="pause_apps_dialog_message">Merknader for %1$s vil bli satt på pause</string>
+    <string name="paused_apps_dialog_title">Program satt på pause</string>
+</resources>

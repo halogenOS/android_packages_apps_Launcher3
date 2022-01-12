@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Wstrzymaj</string>
+    <string name="pause_apps_dialog_title">Wstrzymać %1$s\?</string>
+    <string name="pause_apps_dialog_message">Powiadomienia dla %1$s zostaną wstrzymane</string>
+    <string name="paused_apps_dialog_title">Aplikacja wstrzymana</string>
+    <string name="paused_apps_dialog_message">%1$s została wstrzymana bezpośrednio z poziomu launchera</string>
+    <string name="paused_apps_drop_target_label">Wstrzymaj aplikację</string>
+</resources>

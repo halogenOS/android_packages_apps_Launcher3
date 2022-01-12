@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paused_apps_drop_target_label">تعليق التطبيق</string>
+    <string name="pause_apps_dialog_title">تعليق %1$s؟</string>
+    <string name="pause_apps_dialog_message">سيتم تعليقها إخطارات %1$s</string>
+    <string name="pause">تعليق</string>
+    <string name="paused_apps_dialog_title">تعليق التطبيق</string>
+    <string name="paused_apps_dialog_message">%1$s تم تعليقه بشكل مباشر من المشغل</string>
+</resources>

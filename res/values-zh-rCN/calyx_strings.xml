@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">暂停</string>
+    <string name="pause_apps_dialog_title">暂停 %1$s？</string>
+    <string name="pause_apps_dialog_message">%1$s 的通知将被暂停</string>
+    <string name="paused_apps_dialog_title">应用已暂停</string>
+    <string name="paused_apps_dialog_message">%1$s 被直接从启动器暂停</string>
+    <string name="paused_apps_drop_target_label">暂停应用</string>
+</resources>

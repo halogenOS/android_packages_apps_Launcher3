@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paused_apps_dialog_message">%1$s 앱은 런처에서 일시정지 되었습니다</string>
+    <string name="pause">일시정지</string>
+    <string name="pause_apps_dialog_title">%1$s 앱을 일시정지 하시겠습니까\?</string>
+    <string name="pause_apps_dialog_message">%1$s 앱의 알림이 비활성화 됩니다</string>
+    <string name="paused_apps_dialog_title">일시정지된 앱</string>
+    <string name="paused_apps_drop_target_label">앱 일시정지</string>
+</resources>

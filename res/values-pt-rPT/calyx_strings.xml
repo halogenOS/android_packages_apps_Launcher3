@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Pausar</string>
+    <string name="pause_apps_dialog_title">Pausar %1$s\?</string>
+    <string name="pause_apps_dialog_message">Notificações para %1$s serão pausadas</string>
+    <string name="paused_apps_dialog_title">App pausada</string>
+    <string name="paused_apps_dialog_message">%1$s foi diretamente pausada pelo lançador</string>
+    <string name="paused_apps_drop_target_label">Pausar aplicação</string>
+</resources>

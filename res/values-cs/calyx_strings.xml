@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Pozastavit</string>
+    <string name="pause_apps_dialog_title">Pozastavit %1$s\?</string>
+    <string name="paused_apps_dialog_title">Aplikace pozastavena</string>
+    <string name="pause_apps_dialog_message">Oznámení z %1$s budou pozastavena</string>
+    <string name="paused_apps_dialog_message">Aplikace %1$s byla pozastavena přímo z přehledu aplikací</string>
+    <string name="paused_apps_drop_target_label">Pozastavit aplikaci</string>
+</resources>

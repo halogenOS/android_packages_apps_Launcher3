@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">Jeda</string>
+    <string name="pause_apps_dialog_message">Notifikasi untuk %1$s akan dijeda</string>
+    <string name="paused_apps_drop_target_label">Jeda aplikasi</string>
+    <string name="pause_apps_dialog_title">Jeda %1$s\?</string>
+    <string name="paused_apps_dialog_title">Aplikasi dijeda</string>
+</resources>

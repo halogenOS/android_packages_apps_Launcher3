@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause">विराम</string>
+    <string name="pause_apps_dialog_title">विराम %1$s\?</string>
+    <string name="pause_apps_dialog_message">%1$s साठी सूचनांना विराम दिला जाईल</string>
+    <string name="paused_apps_dialog_title">अ‍ॅपला विराम दिला</string>
+    <string name="paused_apps_dialog_message">%1$s ला लाँचरवरून थेट विराम दिला</string>
+    <string name="paused_apps_drop_target_label">अ‍ॅपला विराम द्या</string>
+</resources>

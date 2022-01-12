@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pause_apps_dialog_title">Приостановить %1$s\?</string>
+    <string name="paused_apps_dialog_title">Приложение приостановлено</string>
+    <string name="paused_apps_drop_target_label">Приостановка приложения</string>
+    <string name="pause_apps_dialog_message">Уведомления для %1$s будут приостановлены</string>
+    <string name="pause">Пауза</string>
+    <string name="paused_apps_dialog_message">%1$s был приостановлен из лаунчера</string>
+</resources>

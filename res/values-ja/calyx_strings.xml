@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paused_apps_dialog_title">アプリは一時停止されました</string>
+    <string name="paused_apps_dialog_message">%1$s はランチャーから直接一時停止されました</string>
+    <string name="paused_apps_drop_target_label">アプリを一時停止</string>
+    <string name="pause">一時停止</string>
+    <string name="pause_apps_dialog_message">%1$s からの通知は一時停止されます</string>
+    <string name="pause_apps_dialog_title">%1$s を一時停止しますか？</string>
+</resources>

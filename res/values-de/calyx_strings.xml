@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paused_apps_dialog_message">%1$s wurde direkt vom Launcher pausiert</string>
+    <string name="pause_apps_dialog_title">%1$s pausieren\?</string>
+    <string name="pause_apps_dialog_message">Benachrichtigungen für %1$s werden pausiert</string>
+    <string name="paused_apps_dialog_title">App pausiert</string>
+    <string name="pause">Pausieren</string>
+    <string name="paused_apps_drop_target_label">App pausieren</string>
+</resources>
