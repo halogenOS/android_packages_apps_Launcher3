@@ -15,4 +15,7 @@
         <string name="trust_apps_info_hidden">Hidden apps and their widgets are hidden from the drawer</string>
         <string name="trust_apps_info_protected">Protected apps require authentication to be opened from the launcher</string>
 
+    <!-- Dark Status Bar -->
+    <string name="perf_dark_status_bar_title">Dark status bar</string>
+    <string name="perf_dark_status_bar_summary">Use dark status bar on Home screen</string>
 </resources>
