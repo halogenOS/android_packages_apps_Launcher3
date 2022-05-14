@@ -7,4 +7,8 @@
     <!-- Haptics on DT2S -->
     <string name="pref_haptics_on_dt2s_title">Vibrate on double tap to sleep</string>
     <string name="pref_haptics_on_dt2s_summary">Vibrate when performing double tap to sleep gesture</string>
+
+    <!-- Dark status bar -->
+    <string name="perf_dark_status_bar_title">Dark status bar</string>
+    <string name="perf_dark_status_bar_summary">Use dark status bar on Home screen</string>
 </resources>
