@@ -42,17 +42,6 @@
     </resolve>
 
     <!-- Search widget shown at the top, provided by the browser -->
-    <!-- <resolve> doesn't work for appwidgets so just put them both here, the first installed app wins -->
-    <appwidget
-        launcher:screen="0"
-        launcher:x="0"
-        launcher:y="0"
-        launcher:spanX="2"
-        launcher:spanY="1"
-        launcher:packageName="com.duckduckgo.mobile.android"
-        launcher:className="com.duckduckgo.widget.SearchWidget"
-        launcher:appWidgetId="-1" />
-
     <appwidget
         launcher:screen="0"
         launcher:x="0"
