@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause_apps_dialog_title">შევაჩერო %1$s\?</string>
+    <string name="paused_apps_dialog_message">%1$s პირდაპირ გამშვებიდან შეჩერდება</string>
+    <string name="pause">შეჩერება</string>
+    <string name="pause_apps_dialog_message">%1$s-ის გაფრთხილებები შეჩერდება</string>
+    <string name="paused_apps_dialog_title">აპი შეჩერდა</string>
+    <string name="paused_apps_drop_target_label">აპის შეჩერება</string>
+</resources>
