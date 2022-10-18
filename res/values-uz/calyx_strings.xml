@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause">Pauza</string>
+    <string name="pause_apps_dialog_title">%1$sga pauza qilish</string>
+    <string name="pause_apps_dialog_message">Xabarnoma %1$s ga pauza qilindi</string>
+    <string name="paused_apps_dialog_title">Dastur pauza qilindi</string>
+    <string name="paused_apps_drop_target_label">Dasturni pauza qilish</string>
+</resources>
