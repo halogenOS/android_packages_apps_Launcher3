@@ -155,6 +155,7 @@ android_library {
         "iconloader_base",
         "view_capture",
         "animationlib"
+        "SettingsLib",
     ],
     manifest: "AndroidManifest-common.xml",
     sdk_version: "current",
