@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause">Pause</string>
+    <string name="pause_apps_dialog_title">Pause %1$s\?</string>
+    <string name="pause_apps_dialog_message">Meddelelser fra %1$s vil blive sat på pause</string>
+    <string name="paused_apps_dialog_title">App sat på pause</string>
+    <string name="paused_apps_dialog_message">%1$s blev sat på pause direkte fra launcheren</string>
+    <string name="paused_apps_drop_target_label">Sæt app på pause</string>
+</resources>

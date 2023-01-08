@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="paused_apps_drop_target_label">Призупинити застосунок</string>
+    <string name="paused_apps_dialog_message">%1$s було призупинено безпосередньо з панелі лаунчера</string>
+    <string name="pause_apps_dialog_title">Пауза %1$s\?</string>
+    <string name="pause">Пауза</string>
+    <string name="pause_apps_dialog_message">Сповіщення для %1$s буде призупинено</string>
+    <string name="paused_apps_dialog_title">Застосунок призупинено</string>
+</resources>
