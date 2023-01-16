@@ -14,4 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<icons></icons>
+<icons>
+    <icon drawable="@drawable/themed_icon_fdroid" package="org.fdroid.fdroid" />
+    <icon drawable="@drawable/themed_icon_microg" package="com.google.android.gms" />
+</icons>
