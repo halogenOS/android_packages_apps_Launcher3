@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause">Pauzeer</string>
+    <string name="paused_apps_dialog_title">App is gepauzeerd</string>
+    <string name="paused_apps_dialog_message">%1$s was direct gepauzeerd vanuit de launcher</string>
+    <string name="paused_apps_drop_target_label">Pauzeer app</string>
+    <string name="pause_apps_dialog_message">Notificaties voor %1$s worden gepauzeerd</string>
+    <string name="pause_apps_dialog_title">Pauzeer %1$s\?</string>
+</resources>

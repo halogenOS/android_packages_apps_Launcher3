@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause">Pausa</string>
+    <string name="pause_apps_dialog_title">Pausa %1$s\?</string>
+    <string name="pause_apps_dialog_message">Aviseringar för %1$s kommer att pausas</string>
+    <string name="paused_apps_dialog_title">App pausad</string>
+    <string name="paused_apps_dialog_message">%1$s pausades direkt från startprogrammet</string>
+    <string name="paused_apps_drop_target_label">Pausa app</string>
+</resources>
