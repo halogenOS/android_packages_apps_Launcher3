@@ -50,9 +50,6 @@ public abstract class SystemShortcut<T extends Context & ActivityContext> extend
 
     private static final String TAG = "SystemShortcut";
 
-    /** Package name of the Android platform. */
-    private static final String PLATFORM_PACKAGE_NAME = "android";
-
     private final int mIconResId;
     protected final int mLabelResId;
     protected int mAccessibilityActionId;
@@ -284,25 +281,24 @@ public abstract class SystemShortcut<T extends Context & ActivityContext> extend
                     .setMessage(view.getContext().getString(R.string.pause_apps_dialog_message,
                             appLabel))
                     .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(R.string.pause, (dialog, which) -> {
-                        try {
-                            // Suspension (app pause) must appear to come from the system,
-                            // aka PLATFORM_PACKAGE_NAME; otherwise, the suspension may be
-                            // removed by the system in some circumstances, e.g. on reboot.
-                            // See PackageManagerService#removeAllNonSystemPackageSuspensions
-                            AppGlobals.getPackageManager().setPackagesSuspendedAsUser(
-                                    new String[]{
-                                            mItemInfo.getTargetComponent().getPackageName()},
-                                    true, null, null,
-                                    new SuspendDialogInfo.Builder()
-                                            .setIcon(R.drawable.ic_hourglass_top)
-                                            .setTitle(R.string.paused_apps_dialog_title)
-                                            .setMessage(R.string.paused_apps_dialog_message)
-                                            .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
-                                            .build(), PLATFORM_PACKAGE_NAME,
-                                    mItemInfo.user.getIdentifier());
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Failed to pause app", e);
+                    .setPositiveButton(R.string.pause, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                AppGlobals.getPackageManager().setPackagesSuspendedAsUser(
+                                        new String[]{
+                                                mItemInfo.getTargetComponent().getPackageName()},
+                                        true, null, null,
+                                        new SuspendDialogInfo.Builder()
+                                                .setIcon(R.drawable.ic_hourglass_top)
+                                                .setTitle(R.string.paused_apps_dialog_title)
+                                                .setMessage(R.string.paused_apps_dialog_message)
+                                                .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
+                                                .build(), view.getContext().getOpPackageName(),
+                                        mItemInfo.user.getIdentifier());
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Failed to pause app", e);
+                            }
                         }
                     })
                     .show();
