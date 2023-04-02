@@ -57,4 +57,11 @@
         android:defaultValue="true"
         android:persistent="true" />
 
+    <SwitchPreference
+        android:key="pref_haptics_on_dt2s"
+        android:title="@string/pref_haptics_on_dt2s_title"
+        android:summary="@string/pref_haptics_on_dt2s_summary"
+        android:defaultValue="true"
+        android:persistent="true" />
+
 </androidx.preference.PreferenceScreen>

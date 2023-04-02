@@ -3,4 +3,8 @@
     <!-- Double tap to sleep -->
     <string name="pref_sleep_gesture_title">Double tap to sleep</string>
     <string name="pref_sleep_gesture_summary">Double tap on empty space to turn off screen</string>
+
+    <!-- Haptics on DT2S -->
+    <string name="pref_haptics_on_dt2s_title">Vibrate on double tap to sleep</string>
+    <string name="pref_haptics_on_dt2s_summary">Vibrate when performing double tap to sleep gesture</string>
 </resources>
