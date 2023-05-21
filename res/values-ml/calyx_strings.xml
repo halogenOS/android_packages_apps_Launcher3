@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="pause">താൽക്കാലികമായി നിർത്തുക</string>
+    <string name="pause_apps_dialog_title">%1$s താൽക്കാലികമായി നിർത്തണോ\?</string>
+    <string name="pause_apps_dialog_message">%1$s എന്നതിനായുള്ള അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തും</string>
+    <string name="paused_apps_dialog_message">ലോഞ്ചറിൽ നിന്ന് %1$s നേരിട്ട് താൽക്കാലികമായി നിർത്തി</string>
+    <string name="paused_apps_drop_target_label">പ്രയോഗം താൽക്കാലികമായി നിർത്തുക</string>
+    <string name="paused_apps_dialog_title">പ്രയോഗം താൽക്കാലികമായി നിർത്തി</string>
+</resources>
