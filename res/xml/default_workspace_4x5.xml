@@ -71,7 +71,7 @@
         launcher:className="org.chromium.chrome.browser.searchwidget.SearchWidgetProvider"
         launcher:appWidgetId="-1" />
 
-    <!-- Bottom Row: CalyxVPN, TorBrowser, AuroraStore, F-Droid -->
+    <!-- Bottom Row: CalyxVPN, TorBrowser, F-Droid -->
     <favorite
         launcher:screen="0"
         launcher:x="0"
