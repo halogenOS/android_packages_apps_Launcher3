@@ -123,7 +123,7 @@ public class SysUiScrim implements View.OnAttachStateChangeListener {
         if (mTopScrim != null) {
             mTopScrim.setDither(true);
             mBottomMask = createDitheredAlphaMask();
-            mHideSysUiScrim = false;
+            mHideSysUiScrim = true;
         } else {
             mBottomMask = null;
             mHideSysUiScrim = true;
