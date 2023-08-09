@@ -403,7 +403,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
         if (adapterHolder.mAdapterType == AdapterHolder.SEARCH) {
             mNoWidgetsView.setText(R.string.no_search_results);
         } else if (adapterHolder.mAdapterType == AdapterHolder.WORK
-                && mUserManagerState.isAnyProfileQuietModeEnabled()
+                && mUserManagerState.isAllProfilesQuietModeEnabled()
                 && mActivityContext.getStringCache() != null) {
             mNoWidgetsView.setText(mActivityContext.getStringCache().workProfilePausedTitle);
         } else {
