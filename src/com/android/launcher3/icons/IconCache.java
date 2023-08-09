@@ -533,9 +533,7 @@ public class IconCache extends BaseIconCache {
         if (bitmap == null) {
             return getDefaultIcon(user);
         }
-        try (BaseIconFactory bif = getIconFactory()) {
-            return bitmap.withUser(user, bif);
-        }
+        return bitmap.withFlags(getUserFlagOpLocked(user));
     }
 
     protected void applyCacheEntry(@NonNull final CacheEntry entry,

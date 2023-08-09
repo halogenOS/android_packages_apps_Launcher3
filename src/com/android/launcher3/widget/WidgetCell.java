@@ -49,9 +49,7 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.CheckLongPressHelper;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
-import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.R;
-import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.RoundDrawableWrapper;
 import com.android.launcher3.icons.cache.HandlerRunnable;
@@ -412,17 +410,8 @@ public class WidgetCell extends LinearLayout {
         if (Process.myUserHandle().equals(mItem.user)) {
             mWidgetBadge.setVisibility(View.GONE);
         } else {
-            final int iconSize = mActivity.getDeviceProfile().allAppsIconSizePx;
-            try (BaseIconFactory bif = LauncherAppState.getInstance(mContext).getIconCache()
-                    .getIconFactory()) {
-                final Drawable badge = bif.getBadgeForUser(mItem.user, iconSize);
-                if (badge != null) {
-                    mWidgetBadge.setVisibility(View.VISIBLE);
-                    mWidgetBadge.setImageDrawable(badge);
-                } else {
-                    mWidgetBadge.setVisibility(View.GONE);
-                }
-            }
+            mWidgetBadge.setVisibility(View.VISIBLE);
+            mWidgetBadge.setImageResource(R.drawable.ic_work_app_badge);
         }
     }
 
