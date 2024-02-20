@@ -435,8 +435,10 @@ android_app {
 
     optimize: {
         proguard_flags_files: [":launcher-proguard-rules"],
-        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled
-        enabled: false,
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
     },
 
     sdk_version: "current",
@@ -578,6 +580,8 @@ android_app {
     optimize: {
         proguard_flags_files: [":launcher-proguard-rules"],
         enabled: true,
+        optimize: true,
+        shrink: true,
         shrink_resources: true,
     },
 
