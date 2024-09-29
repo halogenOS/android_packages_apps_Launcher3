@@ -56,6 +56,8 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
+import com.android.launcher3.lineage.trust.TrustAppsActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SettingsCache;
@@ -84,6 +86,8 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity
 
     private static final int DELAY_HIGHLIGHT_DURATION_MILLIS = 600;
     public static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
+
+    public static final String KEY_TRUST_APPS = "pref_trust_apps";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
