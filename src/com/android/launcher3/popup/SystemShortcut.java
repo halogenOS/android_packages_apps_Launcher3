@@ -416,7 +416,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 Intent intent = Intent.parseUri(view.getContext().getString(R.string.delete_package_intent), 0)
                     .setData(Uri.fromParts("package", mItemInfo.getTargetComponent().getPackageName(),
                     mItemInfo.getTargetComponent().getClassName())).putExtra(Intent.EXTRA_USER, mItemInfo.user);
-                ((Context) mTarget).startActivitySafely(view, intent, mItemInfo);
+                ((ActivityContext) mTarget).startActivitySafely(view, intent, mItemInfo);
                 AbstractFloatingView.closeAllOpenViews(mTarget);
             } catch (URISyntaxException e) {
                 // Do nothing.
