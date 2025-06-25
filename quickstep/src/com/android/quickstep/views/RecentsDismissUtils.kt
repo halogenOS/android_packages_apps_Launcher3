@@ -59,6 +59,7 @@ class RecentsDismissUtils(private val recentsView: RecentsView<*, *>) {
             FloatPropertyCompat.createFloatPropertyCompat(
                 draggedTaskView.secondaryDismissTranslationProperty
             )
+        val overshootLength = 100f
         val minVelocity =
             recentsView.pagedOrientationHandler.getSecondaryDimension(draggedTaskView).toFloat()
         val startVelocity = abs(velocity).coerceAtLeast(minVelocity) * velocity.sign
@@ -68,7 +69,7 @@ class RecentsDismissUtils(private val recentsView: RecentsView<*, *>) {
                 .setSpring(createExpressiveDismissSpringForce())
                 .setStartVelocity(startVelocity)
                 .addUpdateListener { animation, value, _ ->
-                    if (isDismissing && abs(value) >= abs(dismissLength)) {
+                    if (isDismissing && abs(value) >= abs(dismissLength + overshootLength)) {
                         animation.cancel()
                     } else if (draggedTaskView.isRunningTask && recentsView.enableDrawingLiveTile) {
                         recentsView.runActionOnRemoteHandles { remoteTargetHandle ->
