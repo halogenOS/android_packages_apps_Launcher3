@@ -73,7 +73,8 @@ public class WallpaperOffsetInterpolator {
         // To match the default wallpaper behavior in the system, we default to either the left
         // or right edge on initialization
         if (mLockedToDefaultPage || numScrollableScreens <= 1) {
-            out[0] =  mIsRtl ? 1 : 0;
+            out[0] = 1;
+            out[1] = 2;
             return;
         }
 
