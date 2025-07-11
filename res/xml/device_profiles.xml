@@ -133,7 +133,7 @@
             launcher:minWidthDps="406"
             launcher:minHeightDps="694"
             launcher:iconImageSize="56"
-            launcher:iconTextSize="14.4"
+            launcher:iconTextSize="13.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
@@ -143,7 +143,7 @@
             launcher:minWidthDps="406"
             launcher:minHeightDps="694"
             launcher:iconImageSize="56"
-            launcher:iconTextSize="14.4"
+            launcher:iconTextSize="14.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
@@ -185,7 +185,7 @@
             launcher:minCellHeightLandscape="104"
             launcher:minCellWidthLandscape="120"
             launcher:iconImageSize="60"
-            launcher:iconTextSize="14"
+            launcher:iconTextSize="13"
             launcher:borderSpaceHorizontal="16"
             launcher:borderSpaceVertical="64"
             launcher:borderSpaceLandscapeHorizontal="64"
