@@ -123,6 +123,7 @@
         launcher:numFolderColumns="4"
         launcher:numHotseatIcons="5"
         launcher:numExtendedHotseatIcons="6"
+        launcher:iconTextSize="13.0"
         launcher:dbFile="launcher.db"
         launcher:inlineNavButtonsEndSpacing="@dimen/taskbar_button_margin_split"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
@@ -133,7 +134,7 @@
             launcher:minWidthDps="406"
             launcher:minHeightDps="694"
             launcher:iconImageSize="56"
-            launcher:iconTextSize="13.0"
+            launcher:iconTextSize="12.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
@@ -143,7 +144,7 @@
             launcher:minWidthDps="406"
             launcher:minHeightDps="694"
             launcher:iconImageSize="56"
-            launcher:iconTextSize="14.0"
+            launcher:iconTextSize="13.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
@@ -153,7 +154,7 @@
             launcher:minWidthDps="255"
             launcher:minHeightDps="400"
             launcher:iconImageSize="48"
-            launcher:iconTextSize="13.0"
+            launcher:iconTextSize="12.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
