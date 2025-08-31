@@ -26,6 +26,7 @@ import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
+import com.android.launcher3.dagger.AppFilterModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.HomeScreenFilesModule
@@ -185,6 +186,7 @@ constructor(
                 PluginManagerWrapperModule::class,
                 StaticObjectModule::class,
                 AppModule::class,
+                AppFilterModule::class,
                 PerDisplayModule::class,
                 LauncherConcurrencyModule::class,
                 ExecutorsModule::class,

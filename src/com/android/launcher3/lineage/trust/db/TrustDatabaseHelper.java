@@ -79,7 +79,7 @@ public class TrustDatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_HIDDEN, 1);
 
             int rows = db.update(TABLE_NAME, values, KEY_PKGNAME + " = ?",
-                    new String[]{KEY_PKGNAME});
+                    new String[]{packageName});
             if (rows != 1) {
                 // Entry doesn't exist, create a new one
                 db.insertOrThrow(TABLE_NAME, null, values);
@@ -106,7 +106,7 @@ public class TrustDatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_PROTECTED, 1);
 
             int rows = db.update(TABLE_NAME, values, KEY_PKGNAME + " = ?",
-                    new String[]{KEY_PKGNAME});
+                    new String[]{packageName});
             if (rows != 1) {
                 // Entry doesn't exist, create a new one
                 db.insertOrThrow(TABLE_NAME, null, values);

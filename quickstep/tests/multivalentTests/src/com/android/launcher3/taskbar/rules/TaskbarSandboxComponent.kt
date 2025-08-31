@@ -25,6 +25,7 @@ import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
+import com.android.launcher3.dagger.AppFilterModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.BasePerDisplayModule
@@ -86,6 +87,7 @@ interface TaskbarSandboxComponent : LauncherAppComponent {
             StaticObjectModule::class,
             WidgetModule::class,
             AppModule::class,
+            AppFilterModule::class,
             BasePerDisplayModule::class,
             LauncherConcurrencyModule::class,
             ExecutorsModule::class,
