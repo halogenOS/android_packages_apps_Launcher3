@@ -55,6 +55,7 @@ import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.R
+import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper
 import com.android.launcher3.Utilities
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
@@ -1602,38 +1603,85 @@ constructor(
                 // sure fullscreen apps remain fullscreen we set the windowing mode explicitly.
                 options.launchWindowingMode = WINDOWING_MODE_FULLSCREEN
             }
-        if (
-            ActivityManagerWrapper.getInstance()
-                .startActivityFromRecents(firstTaskContainer.task.key, opts.options)
-        ) {
-            Log.d(
-                TAG,
-                "launchAsStaticTile - startActivityFromRecents: ${taskIds.contentToString()}",
-            )
-            ActiveGestureLog.INSTANCE.trackEvent(
-                ActiveGestureErrorDetector.GestureEvent.EXPECTING_TASK_APPEARED
-            )
-            val recentsView = recentsView ?: return null
-            if (
-                recentsView.runningTaskViewId != -1 &&
-                    recentsView.mRecentsAnimationController != null
-            ) {
-                recentsView.onTaskLaunchedInLiveTileMode()
+        // Check if app is protected before launching from recents
+        val taskIntent = firstTaskContainer.task.key.baseIntent
+        val packageName = taskIntent?.component?.packageName
+        val db = TrustDatabaseHelper.getInstance(context)
+        val isProtected = packageName != null && db.isPackageProtected(packageName)
+        
+        if (isProtected) {
+            // Show authentication screen for protected apps
+            Utilities.showLockScreen(context, context.getString(R.string.trust_apps_manager_name)) {
+                if (
+                    ActivityManagerWrapper.getInstance()
+                        .startActivityFromRecents(firstTaskContainer.task.key, opts.options)
+                ) {
+                    Log.d(
+                        TAG,
+                        "launchAsStaticTile - startActivityFromRecents: ${taskIds.contentToString()}",
+                    )
+                    ActiveGestureLog.INSTANCE.trackEvent(
+                        ActiveGestureErrorDetector.GestureEvent.EXPECTING_TASK_APPEARED
+                    )
+                    val recentsView = recentsView ?: return@showLockScreen
+                    if (
+                        recentsView.runningTaskViewId != -1 &&
+                            recentsView.mRecentsAnimationController != null
+                    ) {
+                        recentsView.onTaskLaunchedInLiveTileMode()
 
-                // Return a fresh callback in the live tile case, so that it's not accidentally
-                // triggered by QuickstepTransitionManager.AppLaunchAnimationRunner.
-                return RunnableList().also { recentsView.addSideTaskLaunchCallback(it) }
+                        // Return a fresh callback in the live tile case, so that it's not accidentally
+                        // triggered by QuickstepTransitionManager.AppLaunchAnimationRunner.
+                        RunnableList().also { recentsView.addSideTaskLaunchCallback(it) }
+                    } else {
+                        // If the recents transition is running (ie. in live tile mode), then the start
+                        // of a new task will merge into the existing transition and it currently will
+                        // not be run independently, so we need to rely on the onTaskAppeared() call
+                        // for the new task to trigger the side launch callback to flush this runnable
+                        // list (which is usually flushed when the app launch animation finishes)
+                        recentsView.addSideTaskLaunchCallback(opts.onEndCallback)
+                        opts.onEndCallback
+                    }
+                } else {
+                    notifyTaskLaunchFailed("launchAsStaticTile")
+                    null
+                }
             }
-            // If the recents transition is running (ie. in live tile mode), then the start
-            // of a new task will merge into the existing transition and it currently will
-            // not be run independently, so we need to rely on the onTaskAppeared() call
-            // for the new task to trigger the side launch callback to flush this runnable
-            // list (which is usually flushed when the app launch animation finishes)
-            recentsView.addSideTaskLaunchCallback(opts.onEndCallback)
-            return opts.onEndCallback
+            return null // Return null immediately, the actual launch happens in the callback
         } else {
-            notifyTaskLaunchFailed("launchAsStaticTile")
-            return null
+            if (
+                ActivityManagerWrapper.getInstance()
+                    .startActivityFromRecents(firstTaskContainer.task.key, opts.options)
+            ) {
+                Log.d(
+                    TAG,
+                    "launchAsStaticTile - startActivityFromRecents: ${taskIds.contentToString()}",
+                )
+                ActiveGestureLog.INSTANCE.trackEvent(
+                    ActiveGestureErrorDetector.GestureEvent.EXPECTING_TASK_APPEARED
+                )
+                val recentsView = recentsView ?: return null
+                if (
+                    recentsView.runningTaskViewId != -1 &&
+                        recentsView.mRecentsAnimationController != null
+                ) {
+                    recentsView.onTaskLaunchedInLiveTileMode()
+
+                    // Return a fresh callback in the live tile case, so that it's not accidentally
+                    // triggered by QuickstepTransitionManager.AppLaunchAnimationRunner.
+                    return RunnableList().also { recentsView.addSideTaskLaunchCallback(it) }
+                }
+                // If the recents transition is running (ie. in live tile mode), then the start
+                // of a new task will merge into the existing transition and it currently will
+                // not be run independently, so we need to rely on the onTaskAppeared() call
+                // for the new task to trigger the side launch callback to flush this runnable
+                // list (which is usually flushed when the app launch animation finishes)
+                recentsView.addSideTaskLaunchCallback(opts.onEndCallback)
+                return opts.onEndCallback
+            } else {
+                notifyTaskLaunchFailed("launchAsStaticTile")
+                return null
+            }
         }
     }
 
@@ -1694,23 +1742,48 @@ constructor(
                     // TODO(b/331754864): Update this to use TV.shouldShowSplash
                     disableStartingWindow = firstTaskContainer.shouldShowSplashView
                 }
-        Executors.UI_HELPER_EXECUTOR.execute {
-            Log.d(
-                TAG,
-                "launchWithoutAnimation(isQuickSwitch: $isQuickSwitch) - " +
-                    "startActivityFromRecents: ${taskIds.contentToString()}",
-            )
-            if (
-                !ActivityManagerWrapper.getInstance()
-                    .startActivityFromRecents(firstTaskContainer.task.key, opts)
-            ) {
-                Log.d(TAG, "launchWithoutAnimation - task launch failed")
-                // If the call to start activity failed, then post the result immediately,
-                // otherwise, wait for the animation start callback from the activity options
-                // above
-                Executors.MAIN_EXECUTOR.post {
-                    notifyTaskLaunchFailed("launchTask")
-                    callbackWithLogging(false)
+        // Check if app is protected before launching from recents
+        val taskIntent = firstTaskContainer.task.key.baseIntent
+        val packageName = taskIntent?.component?.packageName
+        val db = TrustDatabaseHelper.getInstance(context)
+        val isProtected = packageName != null && db.isPackageProtected(packageName)
+
+        if (isProtected) {
+            Utilities.showLockScreen(context, context.getString(R.string.trust_apps_manager_name)) {
+                Executors.UI_HELPER_EXECUTOR.execute {
+                    Log.d(
+                        TAG,
+                        "launchWithoutAnimation(isQuickSwitch: $isQuickSwitch) - " +
+                            "startActivityFromRecents: ${taskIds.contentToString()}",
+                    )
+                    if (
+                        !ActivityManagerWrapper.getInstance()
+                            .startActivityFromRecents(firstTaskContainer.task.key, opts)
+                    ) {
+                        Log.d(TAG, "launchWithoutAnimation - task launch failed")
+                        Executors.MAIN_EXECUTOR.post {
+                            notifyTaskLaunchFailed("launchTask")
+                            callbackWithLogging(false)
+                        }
+                    }
+                }
+            }
+        } else {
+            Executors.UI_HELPER_EXECUTOR.execute {
+                Log.d(
+                    TAG,
+                    "launchWithoutAnimation(isQuickSwitch: $isQuickSwitch) - " +
+                        "startActivityFromRecents: ${taskIds.contentToString()}",
+                )
+                if (
+                    !ActivityManagerWrapper.getInstance()
+                        .startActivityFromRecents(firstTaskContainer.task.key, opts)
+                ) {
+                    Log.d(TAG, "launchWithoutAnimation - task launch failed")
+                    Executors.MAIN_EXECUTOR.post {
+                        notifyTaskLaunchFailed("launchTask")
+                        callbackWithLogging(false)
+                    }
                 }
             }
         }
