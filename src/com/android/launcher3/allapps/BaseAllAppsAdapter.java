@@ -25,7 +25,6 @@ import static com.android.launcher3.allapps.SectionDecorationInfo.ROUND_TOP_RIGH
 import static com.android.launcher3.allapps.UserProfileManager.STATE_DISABLED;
 import static com.android.launcher3.allapps.UserProfileManager.STATE_ENABLED;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,7 +50,7 @@ import com.android.launcher3.views.ActivityContext;
 public abstract class BaseAllAppsAdapter
         extends RecyclerView.Adapter<BaseAllAppsAdapter.ViewHolder> {
 
-    public static final String TAG = "BaseAllAppsAdapter";
+
 
     // A normal icon
     public static final int VIEW_TYPE_ICON = 1 << 1;
@@ -280,13 +279,6 @@ public abstract class BaseAllAppsAdapter
                                     privateProfileManager.getReadyToAnimate())
                                 && privateProfileManager.getCurrentState() == STATE_ENABLED
                                 ? 0 : 1);
-                        Log.d(TAG, "onBindViewHolder: "
-                                + "isPrivateSpaceItem: " + isPrivateSpaceItem
-                        + " isStateTransitioning: " + privateProfileManager.isStateTransitioning()
-                        + " isScrolling: " + privateProfileManager.isScrolling()
-                        + " readyToAnimate: " + privateProfileManager.getReadyToAnimate()
-                        + " currentState: " + privateProfileManager.getCurrentState()
-                        + " currentAlpha: " + icon.getAlpha());
                     }
                     // Views can still be bounded before the app list is updated hence showing icons
                     // after collapsing.
