@@ -20,6 +20,8 @@
     android:layout_height="@dimen/all_apps_search_bar_field_height"
     android:layout_centerHorizontal="true"
     android:layout_gravity="top|center_horizontal"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:background="@drawable/bg_all_apps_searchbox"
     android:focusableInTouchMode="true"
     android:drawableStart="@drawable/ic_allapps_search"
@@ -38,5 +40,5 @@
     android:scrollHorizontally="true"
     android:singleLine="true"
     android:textColor="?android:attr/textColorSecondary"
-    android:textColorHint="?android:attr/materialColorOnSurfaceVariant"
+    android:textColorHint="@color/materialColorOnSurfaceVariant"
     android:textSize="16sp" />

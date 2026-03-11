@@ -407,7 +407,8 @@ public class DeviceProfile {
         mBubbleBarSpaceThresholdPx =
                 res.getDimensionPixelSize(R.dimen.bubblebar_hotseat_adjustment_threshold);
 
-        int allAppsTopPadding = -res.getDimensionPixelSize(R.dimen.bottom_sheet_handle_area_height);
+        int allAppsTopPadding = -(res.getDimensionPixelSize(R.dimen.bottom_sheet_handle_margin)
+                + res.getDimensionPixelSize(R.dimen.bottom_sheet_handle_height));
 
         // Needs to be calculated after hotseatBarSizePx is correct,
         // for the available height to be correct
