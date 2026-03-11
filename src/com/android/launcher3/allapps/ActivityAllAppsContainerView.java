@@ -1217,6 +1217,18 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             }
             setPadding(grid.allAppsLeftRightMargin, topPadding, grid.allAppsLeftRightMargin, 0);
         }
+        View handle = findViewById(R.id.bottom_sheet_handle);
+        if (handle != null) {
+            MarginLayoutParams hlp = (MarginLayoutParams) handle.getLayoutParams();
+            hlp.topMargin = insets.top;
+            handle.setLayoutParams(hlp);
+        }
+        if (mBottomSheetHandleArea != null) {
+            mBottomSheetHandleArea.getLayoutParams().height = insets.top
+                    + getResources().getDimensionPixelSize(
+                            R.dimen.bottom_sheet_handle_area_height);
+            mBottomSheetHandleArea.requestLayout();
+        }
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
 

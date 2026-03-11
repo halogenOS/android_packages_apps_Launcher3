@@ -19,6 +19,7 @@ import static android.multiuser.Flags.enableMovingContentIntoPrivateSpace;
 
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PRIVATESPACE;
 import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_BOTTOM_VIEW_TO_SCROLL_TO;
+import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_TOP_SPACER;
 import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_MASK_PRIVATE_SPACE_HEADER;
 import static com.android.launcher3.allapps.SectionDecorationInfo.ROUND_BOTTOM_LEFT;
 import static com.android.launcher3.allapps.SectionDecorationInfo.ROUND_BOTTOM_RIGHT;
@@ -300,6 +301,8 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
             mAdapterItems.addAll(mSearchResults);
         } else {
             int position = 0;
+            mAdapterItems.add(new AdapterItem(VIEW_TYPE_TOP_SPACER));
+            position++;
             boolean addApps = true;
             if (mWorkProviderManager != null) {
                 position += mWorkProviderManager.addWorkItems(mAdapterItems);

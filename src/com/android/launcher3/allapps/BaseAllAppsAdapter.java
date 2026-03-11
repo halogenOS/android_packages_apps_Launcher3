@@ -65,7 +65,8 @@ public abstract class BaseAllAppsAdapter
     public static final int VIEW_TYPE_PRIVATE_SPACE_SYS_APPS_DIVIDER = 1 << 7;
     public static final int VIEW_TYPE_BOTTOM_VIEW_TO_SCROLL_TO = 1 << 8;
     public static final int VIEW_TYPE_PRIVATE_SPACE_APP_ICON = 1 << 9;
-    public static final int NEXT_ID = 10;
+    public static final int VIEW_TYPE_TOP_SPACER = 1 << 10;
+    public static final int NEXT_ID = 11;
 
     // Common view type masks
     public static final int VIEW_TYPE_MASK_DIVIDER = VIEW_TYPE_ALL_APPS_DIVIDER;
@@ -244,6 +245,14 @@ public abstract class BaseAllAppsAdapter
                         R.layout.private_space_header, parent, false));
             case VIEW_TYPE_BOTTOM_VIEW_TO_SCROLL_TO:
                 return new ViewHolder(new View(mActivityContext.asContext()));
+            case VIEW_TYPE_TOP_SPACER: {
+                View spacer = new View(mActivityContext.asContext());
+                spacer.setLayoutParams(new RecyclerView.LayoutParams(
+                        RecyclerView.LayoutParams.MATCH_PARENT,
+                        mActivityContext.asContext().getResources().getDimensionPixelSize(
+                                R.dimen.all_apps_top_spacer_height)));
+                return new ViewHolder(spacer);
+            }
             default:
                 if (mAdapterProvider.isViewSupported(viewType)) {
                     return mAdapterProvider.onCreateViewHolder(mLayoutInflater, parent, viewType);

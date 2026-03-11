@@ -123,7 +123,9 @@
     <dimen name="all_apps_header_top_margin">33dp</dimen>
     <dimen name="all_apps_header_top_padding">36dp</dimen>
     <!-- Additional top padding to add when Floating Searchbar is enabled. -->
-    <dimen name="all_apps_additional_top_padding_floating_search">24dp</dimen>
+    <dimen name="all_apps_additional_top_padding_floating_search">16dp</dimen>
+    <!-- Height of the spacer above the first row in all apps. -->
+    <dimen name="all_apps_top_spacer_height">16dp</dimen>
     <dimen name="all_apps_header_bottom_padding">14dp</dimen>
     <dimen name="all_apps_header_top_adjustment">6dp</dimen>
     <dimen name="all_apps_header_bottom_adjustment">4dp</dimen>
