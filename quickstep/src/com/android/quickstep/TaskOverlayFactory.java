@@ -436,6 +436,13 @@ public class TaskOverlayFactory {
             public void onSaveAppPair() {
                 endLiveTileMode(TaskOverlay.this::saveAppPair);
             }
+
+            public void onClearAll() {
+                RecentsView recentsView = mTaskContainer.getTaskView().getRecentsView();
+                if (recentsView != null) {
+                    recentsView.dismissAllTasks();
+                }
+            }
         }
     }
 
@@ -452,5 +459,8 @@ public class TaskOverlayFactory {
 
         /** User wants to save an app pair with current group of apps. */
         void onSaveAppPair();
+
+        /** User wants to clear all recent tasks. */
+        void onClearAll();
     }
 }
