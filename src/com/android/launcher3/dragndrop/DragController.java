@@ -81,6 +81,12 @@ public abstract class DragController<T extends ActivityContext>
     /** Coordinate for last touch event **/
     protected final Point mLastTouch = new Point();
 
+    /** Sets the motion-down point (for cross-window drags where the touch origin differs). */
+    public void setMotionDown(int x, int y) {
+        mMotionDown.set(x, y);
+        mLastTouch.set(x, y);
+    }
+
     protected final Point mTmpPoint = new Point();
 
     @VisibleForTesting

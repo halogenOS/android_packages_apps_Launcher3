@@ -136,19 +136,13 @@ public class AllAppsState extends LauncherState {
     @Override
     protected <DEVICE_PROFILE_CONTEXT extends Context & ActivityContext>
             float getDepthUnchecked(DEVICE_PROFILE_CONTEXT context) {
-        if (context.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            return context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
-        } else {
-            // The scrim fades in at approximately 50% of the swipe gesture.
-            // The depth should be twice of what we want, in order to fully zoom out during the
-            // visible portion of the animation.
-            return BaseDepthController.DEPTH_60_PERCENT;
-        }
+        // Depth/blur is handled by the AllAppsWindow's FLAG_BLUR_BEHIND.
+        return 0f;
     }
 
     @Override
     public boolean shouldBlurWorkspace(LauncherState targetState) {
-        return targetState == ALL_APPS || targetState == NORMAL;
+        return false;
     }
 
     @Override
@@ -202,16 +196,6 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        int backgroundColor;
-        if (!launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            // Always use an opaque scrim if there's no sheet.
-            backgroundColor = launcher.getResources().getColor(R.color.materialColorSurfaceDim);
-        } else if (!Flags.allAppsBlur()) {
-            // If there's a sheet but no blur, use the old scrim color.
-            backgroundColor = launcher.getResources().getColor(R.color.widgets_picker_scrim);
-        } else {
-            backgroundColor = Themes.getAttrColor(launcher, R.attr.allAppsScrimColor);
-        }
-        return new ScrimColors(backgroundColor, /* foregroundColor */ Color.TRANSPARENT);
+        return new ScrimColors(Color.TRANSPARENT, Color.TRANSPARENT);
     }
 }

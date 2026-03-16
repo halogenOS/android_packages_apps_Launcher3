@@ -101,6 +101,22 @@ public class DragLayer extends BaseDragLayer<Launcher> implements LauncherOverla
      * @param context The application's context.
      * @param attrs The attributes set containing the Workspace's customization values.
      */
+    @Override
+    public float getLocationInDragLayer(View child, int[] loc) {
+        // If the view is in a different window (e.g. AllApps window), it's not a
+        // descendant of this DragLayer. Fall back to screen coordinates.
+        if (child.getRootView() != getRootView()) {
+            int[] childScreen = new int[2];
+            child.getLocationOnScreen(childScreen);
+            int[] myScreen = new int[2];
+            getLocationOnScreen(myScreen);
+            loc[0] = childScreen[0] - myScreen[0];
+            loc[1] = childScreen[1] - myScreen[1];
+            return 1f;
+        }
+        return super.getLocationInDragLayer(child, loc);
+    }
+
     public DragLayer(Context context, AttributeSet attrs) {
         super(context, attrs, ALPHA_CHANNEL_COUNT);
 

@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -75,9 +76,13 @@ public class FloatingHeaderView extends LinearLayout implements
                     moved(current);
                     applyVerticalMove();
                     if (headerCollapsed != mHeaderCollapsed) {
-                        ActivityAllAppsContainerView<?> parent =
-                                (ActivityAllAppsContainerView<?>) getParent();
-                        parent.invalidateHeader();
+                        ViewParent p = getParent();
+                        while (p != null && !(p instanceof ActivityAllAppsContainerView)) {
+                            p = p.getParent();
+                        }
+                        if (p != null) {
+                            ((ActivityAllAppsContainerView<?>) p).invalidateHeader();
+                        }
                     }
                 }
             };
@@ -200,9 +205,12 @@ public class FloatingHeaderView extends LinearLayout implements
         updateExpectedHeight();
 
         if (mMaxTranslation != oldMaxHeight || mFloatingRowsCollapsed) {
-            ActivityAllAppsContainerView parent = (ActivityAllAppsContainerView) getParent();
-            if (parent != null) {
-                parent.setupHeader();
+            ViewParent p = getParent();
+            while (p != null && !(p instanceof ActivityAllAppsContainerView)) {
+                p = p.getParent();
+            }
+            if (p != null) {
+                ((ActivityAllAppsContainerView) p).setupHeader();
             }
         }
     }
@@ -357,13 +365,13 @@ public class FloatingHeaderView extends LinearLayout implements
         // clipping on a draw might cause additional redraw
         setClipBounds(mHeaderClip);
         if (mMainRV != null) {
-            mMainRV.setClipBounds(mRVClip);
+            mMainRV.setClipBounds(null);
         }
         if (mWorkRV != null) {
-            mWorkRV.setClipBounds(mRVClip);
+            mWorkRV.setClipBounds(null);
         }
         if (mSearchRV != null) {
-            mSearchRV.setClipBounds(mRVClip);
+            mSearchRV.setClipBounds(null);
         }
     }
 

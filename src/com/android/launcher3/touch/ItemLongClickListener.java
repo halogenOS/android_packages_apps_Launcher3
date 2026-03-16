@@ -36,6 +36,7 @@ import com.android.launcher3.celllayout.CellInfo;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
+import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.logging.StatsLogManager.StatsLogger;
 import com.android.launcher3.model.data.ItemInfo;
@@ -159,12 +160,16 @@ public class ItemLongClickListener {
         }
         logger.log(LAUNCHER_ALLAPPS_ITEM_LONG_PRESSED);
 
-        // Start the drag
         final DragController dragController = launcher.getDragController();
+
         dragController.addDragListener(new DragController.DragListener() {
             @Override
             public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
-                v.setVisibility(INVISIBLE);
+                // Show the DragView now that the drawer is closing
+                if (dragObject.dragView != null) {
+                    dragObject.dragView.setVisibility(VISIBLE);
+                }
+                launcher.getStateManager().goToState(NORMAL);
             }
 
             @Override
@@ -174,8 +179,42 @@ public class ItemLongClickListener {
             }
         });
 
+        // The touch event happened in the AllApps window, so the main DragController's
+        // mMotionDown is stale. Set it to the icon center in main DragLayer coordinates.
+        int[] touchScreen = new int[2];
+        v.getLocationOnScreen(touchScreen);
+        touchScreen[0] += v.getWidth() / 2;
+        touchScreen[1] += v.getHeight() / 2;
+        int[] dlScreen = new int[2];
+        launcher.getDragLayer().getLocationOnScreen(dlScreen);
+        dragController.setMotionDown(
+                touchScreen[0] - dlScreen[0], touchScreen[1] - dlScreen[1]);
+
         launcher.getWorkspace().beginDragShared(v, launcher.getAppsView(), new DragOptions());
+
+        // Hide the DragView during pre-drag — it's behind the AllApps blur window
+        // and would show as a ghost. It becomes visible in onDragStart above.
+        if (dragController.mDragObject != null && dragController.mDragObject.dragView != null) {
+            dragController.mDragObject.dragView.setVisibility(INVISIBLE);
+        }
+
+        // Keep the source icon visible during pre-drag (popup menu phase).
+        // Post to ensure it runs after any internal callbacks that hide the view.
+        v.setVisibility(VISIBLE);
+        v.post(() -> v.setVisibility(VISIBLE));
+
         return false;
+    }
+
+    private static com.android.launcher3.allapps.AllAppsDragLayer findAllAppsDragLayer(View v) {
+        android.view.ViewParent p = v.getParent();
+        while (p != null) {
+            if (p instanceof com.android.launcher3.allapps.AllAppsDragLayer) {
+                return (com.android.launcher3.allapps.AllAppsDragLayer) p;
+            }
+            p = p.getParent();
+        }
+        return null;
     }
 
     public static boolean canStartDrag(Launcher launcher) {

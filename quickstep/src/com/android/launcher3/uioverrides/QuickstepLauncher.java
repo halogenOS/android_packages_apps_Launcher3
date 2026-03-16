@@ -27,6 +27,9 @@ import static com.android.launcher3.Flags.enableExpressiveDismissTaskMotion;
 import static com.android.launcher3.Flags.enableOverviewBackgroundWallpaperBlur;
 import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
+import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
+import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WORKSPACE_STATE;
+import static com.android.launcher3.LauncherAnimUtils.WORKSPACE_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.PENDING_SPLIT_SELECT_INFO;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE;
 import static com.android.launcher3.LauncherSettings.Animation.DEFAULT_NO_ICON;
@@ -494,8 +497,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled()
-                && Flags.allAppsBlur();
+        // All-apps blur is handled by AllAppsWindow's FLAG_BLUR_BEHIND.
+        return false;
     }
 
     @Override
@@ -510,10 +513,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             if (isOverviewBackgroundBlurEnabled() != mOverviewBlurEnabled) {
                 mWallpaperThemeManager.recreateToUpdateTheme();
             }
-        } else if (Flags.allAppsBlur()) {
-            // For all apps, we only need to update the scrim, which draws the panel. But if the
-            // activity was recreated above, this is unnecessary.
-            getAppsView().invalidateHeader();
         }
     }
 
@@ -1038,6 +1037,13 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     public void onAllAppsTransition(float progress) {
         super.onAllAppsTransition(progress);
         onTaskbarInAppDisplayProgressUpdate(progress, ALL_APPS_PAGE_PROGRESS_INDEX);
+        // Drive workspace/hotseat depth scale during drag-to-close.
+        float targetScale = getDeviceProfile().mWorkspaceProfile.getWorkspaceContentScale();
+        float scale = 1f + (targetScale - 1f) * progress;
+        WORKSPACE_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_WORKSPACE_STATE)
+                .set(getWorkspace(), scale);
+        HOTSEAT_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_WORKSPACE_STATE)
+                .set(getHotseat(), scale);
     }
 
     @Override

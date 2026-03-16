@@ -31,6 +31,7 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
@@ -260,8 +261,25 @@ public abstract class AbstractFloatingView extends LinearLayout implements Touch
         if (dragLayer == null) return null;
         // Iterate in reverse order. AbstractFloatingView is added later to the dragLayer,
         // and will be one of the last views.
-        for (int i = dragLayer.getChildCount() - 1; i >= 0; i--) {
-            View child = dragLayer.getChildAt(i);
+        T result = searchDragLayer(dragLayer, type, mustBeOpen);
+        if (result != null) return result;
+
+        // Also search the AllApps drag layer if present
+        if (activity instanceof com.android.launcher3.Launcher launcher) {
+            View appsView = launcher.getAppsView();
+            if (appsView != null && appsView.getParent()
+                    instanceof com.android.launcher3.allapps.AllAppsDragLayer allAppsDl) {
+                result = searchDragLayer(allAppsDl, type, mustBeOpen);
+                if (result != null) return result;
+            }
+        }
+        return null;
+    }
+
+    private static <T extends AbstractFloatingView> T searchDragLayer(
+            ViewGroup layer, @FloatingViewType int type, boolean mustBeOpen) {
+        for (int i = layer.getChildCount() - 1; i >= 0; i--) {
+            View child = layer.getChildAt(i);
             if (child instanceof AbstractFloatingView) {
                 AbstractFloatingView view = (AbstractFloatingView) child;
                 if (view.isOfType(type) && (!mustBeOpen || view.isOpen())) {
