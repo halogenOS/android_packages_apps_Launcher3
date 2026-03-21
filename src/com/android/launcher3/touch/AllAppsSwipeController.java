@@ -26,6 +26,7 @@ import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_ALL_APPS_FADE;
+import static com.android.launcher3.states.StateAnimationConfig.ANIM_DEPTH;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_HOTSEAT_FADE;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_HOTSEAT_SCALE;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_HOTSEAT_TRANSLATE;
@@ -39,6 +40,7 @@ import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.AbstractFloatingView;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.states.StateAnimationConfig;
@@ -71,6 +73,7 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
     public static final float ALL_APPS_STATE_TRANSITION_MANUAL = 0.4f;
     private static final float ALL_APPS_FADE_END_ATOMIC = 0.8333f;
     private static final float ALL_APPS_FADE_END_MANUAL = 0.8f;
+    private static final float ALL_APPS_FULL_DEPTH_PROGRESS = 0.5f;
     private static final float SCRIM_FADE_START_ATOMIC = 0.2642f;
     private static final float SCRIM_FADE_START_MANUAL = 0.117f;
     private static final float WORKSPACE_MOTION_START_ATOMIC = 0.1667f;
@@ -81,6 +84,15 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
             Interpolators.clampToProgress(FINAL_FRAME, 0f, ALL_APPS_STATE_TRANSITION_ATOMIC);
     private static final Interpolator STEP_TRANSITION_MANUAL =
             Interpolators.clampToProgress(FINAL_FRAME, 0f, ALL_APPS_STATE_TRANSITION_MANUAL);
+
+    // The blur to All Apps is set to be complete when the interpolator is at 0.5.
+    private static final Interpolator BLUR_ADJUSTED =
+            Interpolators.mapToProgress(LINEAR, 0f, ALL_APPS_FULL_DEPTH_PROGRESS);
+    public static final Interpolator BLUR_ATOMIC =
+            Interpolators.clampToProgress(
+                    BLUR_ADJUSTED, WORKSPACE_MOTION_START_ATOMIC, ALL_APPS_STATE_TRANSITION_ATOMIC);
+    public static final Interpolator BLUR_MANUAL =
+            Interpolators.clampToProgress(BLUR_ADJUSTED, 0f, ALL_APPS_STATE_TRANSITION_MANUAL);
 
     public static final Interpolator WORKSPACE_FADE_ATOMIC = STEP_TRANSITION_ATOMIC;
     public static final Interpolator WORKSPACE_FADE_MANUAL = STEP_TRANSITION_MANUAL;
@@ -191,9 +203,6 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
      * Applies Animation config values for transition from all apps to home.
      */
     public static void applyAllAppsToNormalConfig(Launcher launcher, StateAnimationConfig config) {
-        // Depth/blur is handled by AllAppsWindow — skip the depth controller entirely.
-        config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
-
         if (launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
             config.setInterpolator(ANIM_SCRIM_FADE,
                     Interpolators.reverse(ALL_APPS_SCRIM_RESPONDER));
@@ -205,8 +214,17 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
             config.setInterpolator(ANIM_WORKSPACE_SCALE,
                     Interpolators.reverse(ALL_APPS_SHEET_DEPTH));
             config.setInterpolator(ANIM_HOTSEAT_SCALE, Interpolators.reverse(ALL_APPS_SHEET_DEPTH));
+            config.setInterpolator(ANIM_DEPTH, Interpolators.reverse(ALL_APPS_SHEET_DEPTH));
+            if (!Flags.allAppsBlur()
+                    && launcher.getDeviceProfile().getDeviceProperties().isPhone()) {
+                // On phones without blur, reveal the workspace and hotseat when leaving All Apps.
+                config.setInterpolator(ANIM_WORKSPACE_FADE, INSTANT);
+                config.setInterpolator(ANIM_HOTSEAT_FADE, INSTANT);
+                config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
+            }
         } else {
             if (config.isUserControlled()) {
+                config.setInterpolator(ANIM_DEPTH, Interpolators.reverse(BLUR_MANUAL));
                 config.setInterpolator(ANIM_WORKSPACE_FADE,
                         Interpolators.reverse(WORKSPACE_FADE_MANUAL));
                 config.setInterpolator(ANIM_WORKSPACE_SCALE,
@@ -237,9 +255,6 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
      */
     public static void applyNormalToAllAppsAnimConfig(
             Launcher launcher, StateAnimationConfig config) {
-        // Depth/blur is handled by AllAppsWindow — skip the depth controller entirely.
-        config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
-
         if (launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
             config.setInterpolator(ANIM_ALL_APPS_FADE, INSTANT);
             config.setInterpolator(ANIM_SCRIM_FADE, ALL_APPS_SCRIM_RESPONDER);
@@ -248,7 +263,17 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
             }
             config.setInterpolator(ANIM_WORKSPACE_SCALE, ALL_APPS_SHEET_DEPTH);
             config.setInterpolator(ANIM_HOTSEAT_SCALE, ALL_APPS_SHEET_DEPTH);
+            config.setInterpolator(ANIM_DEPTH, ALL_APPS_SHEET_DEPTH);
+            if (!Flags.allAppsBlur()
+                    && launcher.getDeviceProfile().getDeviceProperties().isPhone()) {
+                // On phones without blur, hide the workspace and hotseat when entering All Apps.
+                config.setInterpolator(ANIM_WORKSPACE_FADE, FINAL_FRAME);
+                config.setInterpolator(ANIM_HOTSEAT_FADE, FINAL_FRAME);
+                config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
+            }
         } else {
+            config.setInterpolator(ANIM_DEPTH,
+                    config.isUserControlled() ? BLUR_MANUAL : BLUR_ATOMIC);
             config.setInterpolator(ANIM_WORKSPACE_FADE,
                     config.isUserControlled() ? WORKSPACE_FADE_MANUAL : WORKSPACE_FADE_ATOMIC);
             config.setInterpolator(ANIM_WORKSPACE_SCALE,

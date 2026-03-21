@@ -57,7 +57,6 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.WindowInsets;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -175,7 +174,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     private int mNavBarScrimHeight = 0;
     private SearchRecyclerView mSearchRecyclerView;
     protected SearchAdapterProvider<?> mMainAdapterProvider;
-    protected LinearLayout mContentLayout;
+    private View mBottomSheetHandleArea;
     private boolean mHasWorkApps;
     private boolean mHasPrivateApps;
     private float[] mBottomSheetCornerRadii;
@@ -266,11 +265,11 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 new AlphabeticalAppsList(mActivityContext, null, null, null)));
 
         getLayoutInflater().inflate(R.layout.all_apps_content, this);
-        mContentLayout = findViewById(R.id.all_apps_content_layout);
         mHeader = findViewById(R.id.all_apps_header);
         mAdditionalHeaderRows.clear();
         mAdditionalHeaderRows.addAll(getAdditionalHeaderRows());
-        mBottomSheetBackground = findViewById(R.id.bottom_sheet_handle);
+        mBottomSheetBackground = findViewById(R.id.bottom_sheet_background);
+        mBottomSheetHandleArea = findViewById(R.id.bottom_sheet_handle_area);
         mSearchRecyclerView = findViewById(R.id.search_results_list_view);
         mFastScroller = findViewById(R.id.fast_scroller);
         mFastScroller.setPopupView(findViewById(R.id.fast_scroller_popup));
@@ -279,16 +278,15 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         mSearchContainer = inflateSearchBar();
         if (!isSearchBarFloating()) {
-            // Add search bar into the content layout after the header (index 1),
-            // before the RecyclerView.
-            mContentLayout.addView(mSearchContainer, 1);
+            // Add the search box above everything else in this container (if the flag is enabled,
+            // it's added to drag layer in onAttach instead).
+            addView(mSearchContainer);
+            // The search container is visually at the top of the all apps UI, and should thus be
+            // focused by default. It's added to end of the children list, so it needs to be
+            // explicitly marked as focused by default.
             mSearchContainer.setFocusedByDefault(true);
         }
-        if (mSearchUiManager == null) {
-            View searchEditText = mSearchContainer.findViewById(R.id.search_edit_text);
-            mSearchUiManager = (SearchUiManager) (searchEditText != null
-                    ? searchEditText : mSearchContainer);
-        }
+        mSearchUiManager = (SearchUiManager) mSearchContainer;
     }
 
     public List<AllAppsRow> getAdditionalHeaderRows() {
@@ -435,7 +433,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         // IF the MotionEvent is inside the search box or handle area, and the container keeps on
         // receiving touch input, container should move down.
         if (dragLayer.isEventOverView(mSearchContainer, ev)
-                || dragLayer.isEventOverView(mBottomSheetBackground, ev)) {
+                || dragLayer.isEventOverView(mBottomSheetHandleArea, ev)) {
             return true;
         }
         AllAppsRecyclerView rv = getActiveRecyclerView();
@@ -701,26 +699,12 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 adapterHolder.mRecyclerView.setAdapter(null);
             }
         }
-
-        // The RV/pager lives inside apps_list_container (ConstraintLayout) which also
-        // holds the fast scroller. Swap the RV/pager inside that container.
-        androidx.constraintlayout.widget.ConstraintLayout listContainer =
-                findViewById(R.id.apps_list_container);
         View oldView = getAppsRecyclerViewContainer();
-        if (oldView != null) {
-            listContainer.removeView(oldView);
-        }
-
+        int index = indexOfChild(oldView);
+        removeView(oldView);
         int layout = showTabs ? R.layout.all_apps_tabs : R.layout.all_apps_rv_layout;
-        final View rvContainer = getLayoutInflater().inflate(layout, listContainer, false);
-        androidx.constraintlayout.widget.ConstraintLayout.LayoutParams clp =
-                new androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(0, 0);
-        clp.startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
-        clp.endToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
-        clp.topToTop = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
-        clp.bottomToBottom = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
-        listContainer.addView(rvContainer, 0, clp);
-
+        final View rvContainer = getLayoutInflater().inflate(layout, this, false);
+        addView(rvContainer, index);
         if (showTabs) {
             mViewPager = (AllAppsPagedView) rvContainer;
             mViewPager.initParentViews(this);
@@ -746,6 +730,16 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             mViewPager = null;
         }
 
+        removeCustomRules(rvContainer);
+        removeCustomRules(getSearchRecyclerView());
+        if (isSearchBarFloating()) {
+            alignParentTop(rvContainer, showTabs);
+            alignParentTop(getSearchRecyclerView(), /* tabs= */ false);
+        } else {
+            layoutBelowSearchContainer(rvContainer, showTabs);
+            layoutBelowSearchContainer(getSearchRecyclerView(), /* tabs= */ false);
+        }
+
         updateSearchResultsVisibility();
     }
 
@@ -761,30 +755,10 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 getCurrentPage(),
                 tabsHidden);
 
-        // Corner radius padding so the rounded background is visible above the first row
-        android.view.Display display = mActivityContext instanceof android.app.Activity
-                ? ((android.app.Activity) mActivityContext).getDisplay() : null;
-        android.view.RoundedCorner rc = display != null
-                ? display.getRoundedCorner(android.view.RoundedCorner.POSITION_TOP_LEFT) : null;
-        int cornerRadiusPx = rc != null ? rc.getRadius()
-                : (int) (16f * getResources().getDisplayMetrics().density);
-        int halfBorderSpaceY = mActivityContext.getDeviceProfile()
-                .getAllAppsProfile().getBorderSpacePx().y / 2;
-        int padding = halfBorderSpaceY;
+        int padding = mHeader.getMaxTranslation();
         mAH.forEach(adapterHolder -> {
             adapterHolder.mPadding.top = padding;
             adapterHolder.applyPadding();
-            if (adapterHolder.mRecyclerView != null) {
-                android.graphics.drawable.GradientDrawable bg =
-                        new android.graphics.drawable.GradientDrawable();
-                int surfaceColor = getContext().getColor(R.color.materialColorSurface);
-                bg.setColor((surfaceColor & 0x00FFFFFF) | 0x80000000);
-                bg.setCornerRadii(new float[]{
-                        cornerRadiusPx, cornerRadiusPx,
-                        cornerRadiusPx, cornerRadiusPx,
-                        0, 0, 0, 0});
-                adapterHolder.mRecyclerView.setBackground(bg);
-            }
             if (adapterHolder.mRecyclerView != null) {
                 adapterHolder.mRecyclerView.scrollToTop();
             }
@@ -944,9 +918,10 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         }
 
         RelativeLayout.LayoutParams layoutParams = (LayoutParams) v.getLayoutParams();
-        layoutParams.addRule(RelativeLayout.BELOW, R.id.search_container_all_apps);
+        layoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.search_container_all_apps);
 
-        int topMargin = 0;
+        int topMargin = getContext().getResources().getDimensionPixelSize(
+                R.dimen.all_apps_header_top_margin);
         if (includeTabsMargin) {
             topMargin += getContext().getResources().getDimensionPixelSize(
                     R.dimen.all_apps_header_pill_height);
@@ -1070,13 +1045,11 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     protected void updateBackgroundVisibility(DeviceProfile deviceProfile) {
-        if (mBottomSheetBackground != null) {
-            mBottomSheetBackground.setVisibility(View.VISIBLE);
-            boolean isDark = (getResources().getConfiguration().uiMode
-                    & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
-                    == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            mBottomSheetBackground.getBackground().setTint(isDark ? 0x80FFFFFF : 0x80000000);
-        }
+        mBottomSheetBackground.setVisibility(
+                deviceProfile.shouldShowAllAppsOnSheet() ? View.VISIBLE : View.GONE);
+        // Note: The opaque sheet background and header protection are added in drawOnScrim.
+        // For the taskbar entrypoint, the scrim is drawn by its abstract slide in view container,
+        // so its header protection is derived from this scrim instead.
     }
 
     @VisibleForTesting
@@ -1244,11 +1217,17 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             }
             setPadding(grid.allAppsLeftRightMargin, topPadding, grid.allAppsLeftRightMargin, 0);
         }
-        if (mBottomSheetBackground != null) {
-            boolean isDark = (getResources().getConfiguration().uiMode
-                    & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
-                    == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            mBottomSheetBackground.getBackground().setTint(isDark ? 0x80FFFFFF : 0x80000000);
+        View handle = findViewById(R.id.bottom_sheet_handle);
+        if (handle != null) {
+            MarginLayoutParams hlp = (MarginLayoutParams) handle.getLayoutParams();
+            hlp.topMargin = insets.top;
+            handle.setLayoutParams(hlp);
+        }
+        if (mBottomSheetHandleArea != null) {
+            mBottomSheetHandleArea.getLayoutParams().height = insets.top
+                    + getResources().getDimensionPixelSize(
+                            R.dimen.bottom_sheet_handle_area_height);
+            mBottomSheetHandleArea.requestLayout();
         }
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
@@ -1271,16 +1250,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
         mNavBarScrimHeight = computeNavBarScrimHeight(insets);
         applyAdapterSideAndBottomPaddings(mActivityContext.getDeviceProfile());
-
-        // Position the drag handle below the status bar
-        int statusBarHeight = insets.getInsets(WindowInsets.Type.statusBars()).top;
-        View handle = findViewById(R.id.bottom_sheet_handle);
-        if (handle != null) {
-            MarginLayoutParams hlp = (MarginLayoutParams) handle.getLayoutParams();
-            hlp.topMargin = statusBarHeight;
-            handle.setLayoutParams(hlp);
-        }
-
         return super.dispatchApplyWindowInsets(insets);
     }
 
@@ -1288,7 +1257,12 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
-        // Nav bar scrim removed — icons stay the same color as on the home screen
+        if (mNavBarScrimHeight > 0) {
+            float left = (getWidth() - getWidth() / getScaleX()) / 2;
+            float top = getHeight() / 2f + (getHeight() / 2f - mNavBarScrimHeight) / getScaleY();
+            canvas.drawRect(left, top, getWidth() / getScaleX(),
+                    top + mNavBarScrimHeight / getScaleY(), mNavBarScrimPaint);
+        }
     }
 
     protected void updateSearchResultsVisibility() {
@@ -1483,8 +1457,119 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     @Override
     public void drawOnScrimWithScaleAndBottomOffset(
             Canvas canvas, float scale, @Px int bottomOffsetPx) {
-        // Background is now handled by bg_all_apps_surface.xml directly on the view
-        // in the AllApps window. ScrimView (in the launcher window) should not draw it.
+        final View panel = mBottomSheetBackground;
+        final boolean hasBottomSheet = panel.getVisibility() == VISIBLE;
+        final float translationY = ((View) panel.getParent()).getTranslationY();
+
+        final float horizontalScaleOffset = (1 - scale) * panel.getWidth() / 2;
+        final float verticalScaleOffset = (1 - scale) * (panel.getHeight() - getHeight() / 2);
+        // Left and right insets can be applied to this container, as well as the panel.
+        float left = getLeft() + panel.getLeft();
+        float right = left + panel.getWidth();
+
+        final float topNoScale = panel.getTop() + translationY;
+        final float topWithScale = topNoScale + verticalScaleOffset;
+        final float leftWithScale = left + horizontalScaleOffset;
+        final float rightWithScale = right - horizontalScaleOffset;
+        final float bottomWithOffset = panel.getBottom() + bottomOffsetPx;
+        // Draw full background panel if presenting on a sheet.
+        int bottomSheetBackgroundColor = getBottomSheetBackgroundColor();
+        float bottomSheetBackgroundAlpha = Color.alpha(bottomSheetBackgroundColor) / 255.0f;
+        if (hasBottomSheet) {
+            mHeaderPaint.setColor(bottomSheetBackgroundColor);
+            mHeaderPaint.setAlpha((int) (bottomSheetBackgroundAlpha * 255));
+
+            mTmpRectF.set(
+                    leftWithScale,
+                    topWithScale,
+                    rightWithScale,
+                    bottomWithOffset);
+            mTmpPath.reset();
+            mTmpPath.addRoundRect(mTmpRectF, mBottomSheetCornerRadii, Direction.CW);
+            canvas.drawPath(mTmpPath, mHeaderPaint);
+
+            // When the background panel is blurred (or fallback), we don't add header protection.
+            // TODO (b/414671116): Apply header protection whenever search bar is focused.
+            if (Flags.allAppsBlur()) {
+                return;
+            }
+        }
+
+        if (DEBUG_HEADER_PROTECTION) {
+            mHeaderPaint.setColor(Color.MAGENTA);
+            mHeaderPaint.setAlpha(255);
+        } else {
+            mHeaderPaint.setColor(mHeaderColor);
+            mHeaderPaint.setAlpha((int) (getAlpha() * Color.alpha(mHeaderColor)));
+        }
+
+        // If header is not visible or only differs from the background with alpha, don't draw it.
+        int headerWithoutAlpha = ColorUtils.setAlphaComponent(mHeaderPaint.getColor(), 0);
+        int backgroundWithoutAlpha = ColorUtils.setAlphaComponent(getBackgroundColor(), 0);
+        if (headerWithoutAlpha == backgroundWithoutAlpha || mHeaderPaint.getColor() == 0) {
+            return;
+        }
+
+        if (hasBottomSheet) {
+            mHeaderPaint.setAlpha((int) (mHeaderPaint.getAlpha() * bottomSheetBackgroundAlpha));
+        }
+
+        // Draw header on background panel
+        final float headerBottomNoScale =
+                getHeaderBottom() + getVisibleContainerView().getPaddingTop();
+        final float headerHeightNoScale = headerBottomNoScale - topNoScale;
+        final float headerBottomWithScaleOnTablet = topWithScale + headerHeightNoScale * scale;
+        final float headerBottomOffset = (getVisibleContainerView().getHeight() * (1 - scale) / 2);
+        final float headerBottomWithScaleOnPhone = headerBottomNoScale * scale + headerBottomOffset;
+        final FloatingHeaderView headerView = getFloatingHeaderView();
+        if (hasBottomSheet) {
+            // Start adding header protection if search bar or tabs will attach to the top.
+            if (!isSearchBarFloating() || mUsingTabs) {
+                mTmpRectF.set(
+                        leftWithScale,
+                        topWithScale,
+                        rightWithScale,
+                        headerBottomWithScaleOnTablet);
+                mTmpPath.reset();
+                mTmpPath.addRoundRect(mTmpRectF, mBottomSheetCornerRadii, Direction.CW);
+                canvas.drawPath(mTmpPath, mHeaderPaint);
+            }
+        } else {
+            canvas.drawRect(0, 0, canvas.getWidth(), headerBottomWithScaleOnPhone, mHeaderPaint);
+        }
+
+        // If tab exist (such as work profile), extend header with tab height
+        final int tabsHeight = headerView.getPeripheralProtectionHeight(/* expectedHeight */ false);
+        if (mTabsProtectionAlpha > 0 && tabsHeight != 0) {
+            if (DEBUG_HEADER_PROTECTION) {
+                mHeaderPaint.setColor(Color.BLUE);
+                mHeaderPaint.setAlpha(255);
+            } else {
+                float tabAlpha = getAlpha() * mTabsProtectionAlpha;
+                if (hasBottomSheet) {
+                    tabAlpha *= bottomSheetBackgroundAlpha;
+                }
+                mHeaderPaint.setAlpha((int) tabAlpha);
+            }
+            left = 0f;
+            right = canvas.getWidth();
+            if (hasBottomSheet) {
+                left = leftWithScale;
+                right = rightWithScale;
+            }
+
+            final float tabTopWithScale = hasBottomSheet
+                    ? headerBottomWithScaleOnTablet
+                    : headerBottomWithScaleOnPhone;
+            final float tabBottomWithScale = tabTopWithScale + tabsHeight * scale;
+
+            canvas.drawRect(
+                    left,
+                    tabTopWithScale,
+                    right,
+                    tabBottomWithScale,
+                    mHeaderPaint);
+        }
     }
 
     /**

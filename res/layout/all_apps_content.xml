@@ -15,101 +15,35 @@
 <!-- This file is used by multiple all_apps.xml. Layout consists of all contents
      showed in all apps screen
 -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:launcher="http://schemas.android.com/apk/res-auto">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:id="@+id/all_apps_content_layout"
+    <include
+        layout="@layout/all_apps_bottom_sheet_background"
+        android:visibility="gone" />
+
+    <include
+        layout="@layout/search_results_rv_layout"
+        android:visibility="gone" />
+
+    <include
+        layout="@layout/all_apps_rv_layout"
+        android:visibility="gone" />
+
+    <com.android.launcher3.allapps.FloatingHeaderView
+        android:id="@+id/all_apps_header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:layout_below="@id/search_container_all_apps"
+        android:paddingTop="@dimen/all_apps_header_top_padding"
+        android:paddingBottom="@dimen/all_apps_header_bottom_padding"
+        android:orientation="vertical" >
 
-        <View
-            android:id="@+id/bottom_sheet_handle"
-            android:layout_width="@dimen/bottom_sheet_handle_width"
-            android:layout_height="@dimen/bottom_sheet_handle_height"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/bottom_sheet_handle_margin"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_rounded_corner_bottom_sheet_handle" />
+        <include layout="@layout/floating_header_content" />
 
-        <com.android.launcher3.allapps.FloatingHeaderView
-            android:id="@+id/all_apps_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:paddingTop="0dp"
-            android:paddingBottom="0dp"
-            android:orientation="vertical" >
+        <include layout="@layout/all_apps_personal_work_tabs" />
 
-            <include layout="@layout/floating_header_content" />
+    </com.android.launcher3.allapps.FloatingHeaderView>
 
-            <include layout="@layout/all_apps_personal_work_tabs" />
-
-        </com.android.launcher3.allapps.FloatingHeaderView>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/apps_list_container"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <include
-                layout="@layout/search_results_rv_layout"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                launcher:layout_constraintStart_toStartOf="parent"
-                launcher:layout_constraintEnd_toEndOf="parent"
-                launcher:layout_constraintTop_toTopOf="parent"
-                launcher:layout_constraintBottom_toBottomOf="parent" />
-
-            <com.android.launcher3.allapps.AllAppsRecyclerView
-                android:id="@+id/apps_list_view"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:clipToOutline="false"
-                android:clipToPadding="false"
-                android:descendantFocusability="afterDescendants"
-                android:focusable="true"
-                launcher:layout_constraintStart_toStartOf="parent"
-                launcher:layout_constraintEnd_toEndOf="parent"
-                launcher:layout_constraintTop_toTopOf="parent"
-                launcher:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                android:id="@+id/fast_scroller_popup"
-                style="@style/FastScrollerPopup"
-                android:layout_marginTop="@dimen/all_apps_header_bottom_padding"
-                android:layout_marginEnd="@dimen/fastscroll_popup_margin"
-                launcher:layout_constraintEnd_toEndOf="parent"
-                launcher:layout_constraintTop_toTopOf="parent" />
-
-            <com.android.launcher3.views.RecyclerViewFastScroller
-                android:id="@+id/fast_scroller"
-                android:layout_width="@dimen/fastscroll_width"
-                android:layout_height="0dp"
-                android:layout_marginTop="@dimen/all_apps_header_bottom_padding"
-                android:layout_marginEnd="@dimen/fastscroll_end_margin"
-                launcher:canThumbDetach="true"
-                launcher:layout_constraintEnd_toEndOf="parent"
-                launcher:layout_constraintTop_toTopOf="parent"
-                launcher:layout_constraintBottom_toBottomOf="parent" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/scroll_letter_layout"
-                android:layout_width="@dimen/fastscroll_width"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/all_apps_header_bottom_padding"
-                android:layout_marginEnd="@dimen/fastscroll_list_letter_end_margin"
-                android:clipToPadding="false"
-                android:outlineProvider="none"
-                launcher:layout_constraintEnd_toEndOf="parent"
-                launcher:layout_constraintTop_toTopOf="parent"
-                launcher:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+    <include layout="@layout/all_apps_fast_scroller" />
 </merge>

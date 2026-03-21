@@ -51,7 +51,6 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.R;
-import com.android.launcher3.allapps.search.AppsSearchContainerLayout;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.anim.PropertySetter;
@@ -164,7 +163,6 @@ public class AllAppsTransitionController
     private static final int APPS_VIEW_INDEX_COUNT = 2;
 
     private ActivityAllAppsContainerView<Launcher> mAppsView;
-    @Nullable private AllAppsWindow mAllAppsWindow;
 
     private final Launcher mLauncher;
     private final AnimatedFloat mAllAppScale = new AnimatedFloat(this::onScaleProgressChanged);
@@ -236,29 +234,12 @@ public class AllAppsTransitionController
      */
     public void setProgress(float progress) {
         mProgress = progress;
-        if (mAllAppsWindow != null) {
-            mAllAppsWindow.setProgress(progress);
-        } else {
-            boolean fromBackground =
-                    mLauncher.getStateManager().getCurrentStableState() == BACKGROUND_APP;
-            float shiftRange = fromBackground
-                    ? mLauncher.getDeviceProfile().getDeviceProperties().getHeightPx()
-                    : mShiftRange;
-            getAppsViewProgressTranslationY().setValue(mProgress * shiftRange);
-        }
+        boolean fromBackground =
+                mLauncher.getStateManager().getCurrentStableState() == BACKGROUND_APP;
+        // Allow apps panel to shift the full screen if coming from another app.
+        float shiftRange = fromBackground ? mLauncher.getDeviceProfile().getDeviceProperties().getHeightPx() : mShiftRange;
+        getAppsViewProgressTranslationY().setValue(mProgress * shiftRange);
         mLauncher.onAllAppsTransition(1 - progress);
-
-        // Update the search bar window position to track the spacer
-        if (mAppsView instanceof LauncherAllAppsContainerView lacv) {
-            lacv.updateSearchBarPosition();
-        }
-
-        if (progress < 1f) {
-            View searchBar = mAppsView.getSearchUiManager().getEditText();
-            if (searchBar instanceof AppsSearchContainerLayout search) {
-                search.requestBackgroundCapture();
-            }
-        }
 
         boolean hasScrim = progress < NAV_BAR_COLOR_FORCE_UPDATE_THRESHOLD
                 && mLauncher.getAppsView().getNavBarScrimHeight() > 0;
@@ -464,11 +445,9 @@ public class AllAppsTransitionController
     /**
      * see Launcher#setupViews
      */
-    public void setupViews(ScrimView scrimView, ActivityAllAppsContainerView<Launcher> appsView,
-            @Nullable AllAppsWindow allAppsWindow) {
+    public void setupViews(ScrimView scrimView, ActivityAllAppsContainerView<Launcher> appsView) {
         mScrimView = scrimView;
         mAppsView = appsView;
-        mAllAppsWindow = allAppsWindow;
         mAppsView.setScrimView(scrimView);
 
         mAppsViewAlpha = new MultiValueAlpha(mAppsView, APPS_VIEW_INDEX_COUNT, View.GONE);

@@ -26,13 +26,11 @@ import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.R
-import com.android.launcher3.allapps.AllAppsDragLayer
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.ShortcutUtil
 import com.android.launcher3.views.ActivityContext
-import com.android.launcher3.views.BaseDragLayer
 
 /**
  * Base popup container for shortcuts associated with the item {@code originalView}
@@ -89,13 +87,6 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
         // Hide the container, but don't remove it yet because that interferes with touch events.
         mDeferContainerRemoval = true
         animateClose()
-
-        // Close the all-apps drawer when dragging to the home screen
-        val activityContext = mActivityContext
-        if (activityContext is com.android.launcher3.Launcher) {
-            activityContext.stateManager.goToState(
-                    com.android.launcher3.LauncherState.NORMAL)
-        }
     }
 
     override fun onDropCompleted(target: View, d: DragObject, success: Boolean) {}
@@ -113,16 +104,6 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
                 }
             }
         }
-    }
-
-    override fun getPopupContainer(): BaseDragLayer<*> {
-        // If the original view is inside the AllApps window, use its drag layer
-        var parent = originalView.parent
-        while (parent != null) {
-            if (parent is AllAppsDragLayer) return parent
-            parent = parent.parent
-        }
-        return super.getPopupContainer()
     }
 
     /**

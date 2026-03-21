@@ -26,6 +26,7 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ICON_SURFACE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGETS_FULL_SHEET;
 import static com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType;
+import static com.android.launcher3.Flags.allAppsBlur;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WIDGET_TRANSITION;
@@ -165,9 +166,7 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.ActivityAllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
-import com.android.launcher3.allapps.AllAppsWindow;
 import com.android.launcher3.allapps.DiscoveryBounce;
-import com.android.launcher3.allapps.LauncherAllAppsContainerView;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.PropertyListBuilder;
 import com.android.launcher3.apppairs.AppPairIcon;
@@ -315,102 +314,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private static final String KEY_DARK_STATUS_BAR = "pref_dark_status_bar";
 
-    /**
-     * Captures the display and samples the system bar areas to determine
-     * whether status/nav bar icons should be light or dark.
-     * Uses median OkLCH L of sampled pixels.
-     */
-    private void updateSystemBarIconColors() {
-        android.view.View decor = getWindow().getDecorView();
-        android.view.SurfaceControl sc = decor.getViewRootImpl() != null
-                ? decor.getViewRootImpl().getSurfaceControl() : null;
-        if (sc == null || !sc.isValid()) return;
-        if (getDisplay() == null) return;
-
-        android.window.ScreenCaptureInternal.CaptureArgs args =
-                new android.window.ScreenCaptureInternal.CaptureArgs.Builder<>()
-                        .setExcludeLayers(new android.view.SurfaceControl[]{sc})
-                        .build();
-        // Get insets on main thread before background processing
-        android.view.WindowInsets insets = decor.getRootWindowInsets();
-        final int statusH = insets != null
-                ? insets.getInsets(android.view.WindowInsets.Type.statusBars()).top : 0;
-        final int navH = insets != null
-                ? insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom : 0;
-
-        android.window.ScreenCaptureInternal.ScreenCaptureListener listener =
-                new android.window.ScreenCaptureInternal.ScreenCaptureListener((result, status) -> {
-                    com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR.execute(() -> {
-                        if (result == null) return;
-                        android.hardware.HardwareBuffer buffer = result.getHardwareBuffer();
-                        if (buffer == null) return;
-                        android.graphics.Bitmap bmp = android.graphics.Bitmap.wrapHardwareBuffer(
-                                buffer, result.getColorSpace());
-                        buffer.close();
-                        if (bmp == null) return;
-                        android.graphics.Bitmap sw = bmp.copy(
-                                android.graphics.Bitmap.Config.ARGB_8888, false);
-                        bmp.recycle();
-                        if (sw == null) return;
-
-                        int flags = 0;
-                        if (statusH > 0 && !isAreaDark(sw, statusH, statusH))
-                            flags |= SystemUiController.FLAG_LIGHT_STATUS;
-                        else
-                            flags |= SystemUiController.FLAG_DARK_STATUS;
-                        if (navH > 0 && !isAreaDark(sw,
-                                sw.getHeight() - navH - navH, navH))
-                            flags |= SystemUiController.FLAG_LIGHT_NAV;
-                        else
-                            flags |= SystemUiController.FLAG_DARK_NAV;
-                        sw.recycle();
-
-                        final int f = flags;
-                        runOnUiThread(() -> getSystemUiController().updateUiState(
-                                SystemUiController.UI_STATE_BASE_WINDOW, f));
-                    });
-                });
-
-        try {
-            android.view.WindowManagerGlobal.getWindowManagerService()
-                    .captureDisplay(getDisplay().getDisplayId(), args, listener);
-        } catch (android.os.RemoteException e) {
-            android.util.Log.e(TAG, "captureDisplay failed for system bar colors", e);
-        }
-    }
-
-    private static boolean isAreaDark(android.graphics.Bitmap bmp, int startY, int height) {
-        int endY = Math.min(startY + height, bmp.getHeight());
-        int w = bmp.getWidth();
-        float[] lValues = new float[(w / 4 + 1) * (height / 4 + 1)];
-        int count = 0;
-        for (int y = startY; y < endY; y += 4) {
-            for (int x = 0; x < w; x += 4) {
-                int px = bmp.getPixel(x, y);
-                float r = srgbToLinear(((px >> 16) & 0xFF) / 255f);
-                float g = srgbToLinear(((px >> 8) & 0xFF) / 255f);
-                float b = srgbToLinear((px & 0xFF) / 255f);
-                float l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b;
-                float m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b;
-                float s = 0.0883024619f * r + 0.2220049174f * g + 0.6896926208f * b;
-                float l_ = (float) Math.cbrt(Math.max(l, 0));
-                float m_ = (float) Math.cbrt(Math.max(m, 0));
-                float s_ = (float) Math.cbrt(Math.max(s, 0));
-                float L = 0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_;
-                if (count < lValues.length) lValues[count++] = L;
-            }
-        }
-        if (count == 0) return false;
-        java.util.Arrays.sort(lValues, 0, count);
-        return lValues[count / 2] < 0.5f;
-    }
-
-    private static float srgbToLinear(float c) {
-        return c <= 0.04045f
-                ? c / 12.92f
-                : (float) Math.pow((c + 0.055f) / 1.055f, 2.4);
-    }
-
     // How long to wait before the new-shortcut animation automatically pans the workspace
     @VisibleForTesting public static final int NEW_APPS_PAGE_MOVE_DELAY = 500;
     private static final int NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS = 5;
@@ -452,8 +355,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Thunk
     ActivityAllAppsContainerView<Launcher> mAppsView;
     AllAppsTransitionController mAllAppsController;
-    // Separate window hosting the all apps drawer.
-    private AllAppsWindow mAllAppsWindow;
+    // Views that should be blurred when All Apps is open or depth is otherwise applied.
+    private List<View> mDepthBlurTargets;
 
     // Scrim view for the all apps and overview state.
     @Thunk
@@ -627,8 +530,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         // Listen for screen turning off
         ScreenOnTracker.INSTANCE.get(this).addListener(mScreenOnListener);
-        // Detect wallpaper luminance behind system bars to set icon color.
-        getWindow().getDecorView().post(this::updateSystemBarIconColors);
+        getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
+                Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText)
+                || mSharedPrefs.getBoolean(KEY_DARK_STATUS_BAR, false));
 
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -733,6 +637,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences SharedPrefs, String key) {
+        if (key.equals(KEY_DARK_STATUS_BAR)) {
+            recreate();
+        }
     }
 
     @Override
@@ -1379,6 +1286,9 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Finds all the views we need and configure them properly.
      */
     protected void setupViews() {
+        if (allAppsBlur()) {
+            getTheme().applyStyle(getAllAppsBlurStyleResId(), true);
+        }
         mStartupLatencyLogger.logStart(LAUNCHER_LATENCY_STARTUP_VIEW_INFLATION);
         inflateRootView(R.layout.launcher);
         mStartupLatencyLogger.logEnd(LAUNCHER_LATENCY_STARTUP_VIEW_INFLATION);
@@ -1412,52 +1322,23 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Get the search/delete/uninstall bar
         mDropTargetBar = mDragLayer.findViewById(R.id.drop_target_bar);
 
-        // Setup Apps — hosted in a separate window for SF-native blur
-        mAllAppsWindow = new AllAppsWindow(this);
-        mAppsView = mAllAppsWindow.attach();
+        // Setup Apps
+        mAppsView = findViewById(R.id.apps_view);
         mAppsView.setAllAppsTransitionController(mAllAppsController);
-
-        // Attach the search bar window after the AllApps window so it's on top
-        if (mAppsView instanceof LauncherAllAppsContainerView lacv) {
-            lacv.attachSearchBarWindow();
-        }
 
         // Setup Scrim
         mScrimView = findViewById(R.id.scrim_view);
 
         // Setup the drag controller (drop targets have to be added in reverse order in priority)
         mDropTargetBar.setup(mDragController);
-        mAllAppsController.setupViews(mScrimView, mAppsView, mAllAppsWindow);
-
-        mStateManager.addStateListener(new StateManager.StateListener<LauncherState>() {
-            @Override
-            public void onStateTransitionStart(LauncherState toState) {
-                if (mAllAppsWindow != null && toState != ALL_APPS) {
-                    mAllAppsWindow.setTouchable(false);
-                }
-                if (toState == ALL_APPS && mAppsView instanceof LauncherAllAppsContainerView lacv) {
-                    lacv.setSearchBarVisible(true);
-                }
-            }
-
-            @Override
-            public void onStateTransitionComplete(LauncherState finalState) {
-                if (mAllAppsWindow != null) {
-                    mAllAppsWindow.setTouchable(finalState == ALL_APPS);
-                    if (finalState != ALL_APPS) {
-                        mAllAppsWindow.setProgress(1f);
-                    }
-                }
-                if (mAppsView instanceof LauncherAllAppsContainerView lacv) {
-                    lacv.setSearchBarVisible(finalState == ALL_APPS);
-                }
-            }
-        });
+        mAllAppsController.setupViews(mScrimView, mAppsView);
 
         mWorkspace.getPageIndicator().setShouldAutoHide(
                 !shouldEnableMouseInteractionChanges(mWorkspace.getContext()));
         mWorkspace.getPageIndicator().setPaintColor(Themes.getAttrBoolean(
                 this, R.attr.isWorkspaceDarkText) ? Color.BLACK : Color.WHITE);
+
+        mDepthBlurTargets = List.of(mWorkspace, mHotseat);
 
         mItemInflater = new ItemInflater<>(this, mAppWidgetHolder, getItemOnClickListener(),
                 mFocusHandler, new CellLayout(mWorkspace.getContext(), mWorkspace));
@@ -1845,12 +1726,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mAllAppsWindow != null) {
-            mAllAppsWindow.detach();
-        }
-        if (mAppsView instanceof LauncherAllAppsContainerView lacv) {
-            lacv.detachSearchBarWindow();
-        }
         ACTIVITY_TRACKER.onContextDestroyed(this);
 
         SettingsCache.INSTANCE.get(this).unregister(TOUCHPAD_NATURAL_SCROLLING,
@@ -2837,7 +2712,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     /** @return list of View targets to be blurred based on changes to depth. */
     @NonNull
     public List<View> getDepthBlurTargets() {
-        return Collections.emptyList();
+        return mDepthBlurTargets == null ? Collections.emptyList() : mDepthBlurTargets;
     }
 
     /**
