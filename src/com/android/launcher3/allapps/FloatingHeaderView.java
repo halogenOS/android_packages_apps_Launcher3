@@ -357,13 +357,13 @@ public class FloatingHeaderView extends LinearLayout implements
         // clipping on a draw might cause additional redraw
         setClipBounds(mHeaderClip);
         if (mMainRV != null) {
-            mMainRV.setClipBounds(mRVClip);
+            mMainRV.setClipBounds(null);
         }
         if (mWorkRV != null) {
-            mWorkRV.setClipBounds(mRVClip);
+            mWorkRV.setClipBounds(null);
         }
         if (mSearchRV != null) {
-            mSearchRV.setClipBounds(mRVClip);
+            mSearchRV.setClipBounds(null);
         }
     }
 

@@ -26,7 +26,7 @@
     android:clipToOutline="true"
     android:clipToPadding="false"
     android:descendantFocusability="afterDescendants"
-    android:paddingTop="@dimen/all_apps_paged_view_top_padding"
+    android:paddingTop="4dp"
     launcher:pageIndicator="@+id/tabs" >
 
     <include layout="@layout/all_apps_rv_layout" />

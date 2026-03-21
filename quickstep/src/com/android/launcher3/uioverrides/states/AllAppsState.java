@@ -202,16 +202,6 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        int backgroundColor;
-        if (!launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            // Always use an opaque scrim if there's no sheet.
-            backgroundColor = launcher.getResources().getColor(R.color.materialColorSurfaceDim);
-        } else if (!Flags.allAppsBlur()) {
-            // If there's a sheet but no blur, use the old scrim color.
-            backgroundColor = launcher.getResources().getColor(R.color.widgets_picker_scrim);
-        } else {
-            backgroundColor = Themes.getAttrColor(launcher, R.attr.allAppsScrimColor);
-        }
-        return new ScrimColors(backgroundColor, /* foregroundColor */ Color.TRANSPARENT);
+        return new ScrimColors(Color.TRANSPARENT, Color.TRANSPARENT);
     }
 }

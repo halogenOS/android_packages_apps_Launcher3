@@ -76,6 +76,17 @@ public class AppsSearchContainerLayout extends ExtendedEditText
 
         mSearchQueryBuilder = new SpannableStringBuilder();
         Selection.setSelection(mSearchQueryBuilder, 0);
+        // Semi-transparent M3E background with rounded corners and outline
+        int surfaceColor = context.getColor(com.android.launcher3.R.color.materialColorSurface);
+        int bgColor = (surfaceColor & 0x00FFFFFF) | 0x80000000;
+        float density = getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable searchBg =
+                new android.graphics.drawable.GradientDrawable();
+        searchBg.setColor(bgColor);
+        searchBg.setCornerRadius(13f * density);
+        searchBg.setStroke((int) density, 0x40FFFFFF);
+        setBackground(searchBg);
+
         mContentOverlap =
                 getResources().getDimensionPixelSize(R.dimen.all_apps_search_bar_content_overlap);
     }

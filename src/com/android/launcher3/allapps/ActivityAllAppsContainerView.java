@@ -35,6 +35,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -185,6 +186,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     private int mBottomSheetBackgroundColorLegacy;
     private int mTabsProtectionAlpha;
     @Nullable private AllAppsTransitionController mAllAppsTransitionController;
+    private float mScreenCornerRadius;
+    private float mMaxCornerRadius;
+    private final HighlightBorderDrawable mHighlightBorder = new HighlightBorderDrawable();
 
     public ActivityAllAppsContainerView(Context context) {
         this(context, null);
@@ -311,6 +315,14 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 0,
                 0 // Bottom left
         };
+
+        android.view.Display display = mActivityContext instanceof android.app.Activity
+                ? ((android.app.Activity) mActivityContext).getDisplay() : null;
+        android.view.RoundedCorner rc = display != null
+                ? display.getRoundedCorner(android.view.RoundedCorner.POSITION_TOP_LEFT) : null;
+        mScreenCornerRadius = rc != null ? rc.getRadius() : 0f;
+        mMaxCornerRadius = Math.max(mScreenCornerRadius,
+                56f * getResources().getDisplayMetrics().density);
 
         if (Flags.allAppsBlur()) {
             int layerFg = getContext().getColor(R.color.blur_shade_panel_fg);
@@ -730,14 +742,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             mViewPager = null;
         }
 
-        removeCustomRules(rvContainer);
-        removeCustomRules(getSearchRecyclerView());
-        if (isSearchBarFloating()) {
-            alignParentTop(rvContainer, showTabs);
-            alignParentTop(getSearchRecyclerView(), /* tabs= */ false);
-        } else {
-            layoutBelowSearchContainer(rvContainer, showTabs);
-            layoutBelowSearchContainer(getSearchRecyclerView(), /* tabs= */ false);
+        // Position the RV below the header so the rounded top corners
+        // are visible above the first row of icons.
+        if (rvContainer.getLayoutParams() instanceof RelativeLayout.LayoutParams rlp) {
+            rlp.addRule(RelativeLayout.BELOW, R.id.all_apps_header);
+            rlp.topMargin = mUsingTabs ? 0
+                    : (int) (24f * getResources().getDisplayMetrics().density);
+            rvContainer.setLayoutParams(rlp);
         }
 
         updateSearchResultsVisibility();
@@ -755,10 +766,23 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 getCurrentPage(),
                 tabsHidden);
 
-        int padding = mHeader.getMaxTranslation();
+        int cornerRadiusPx = (int) (28f * getResources().getDisplayMetrics().density);
+        int padding = 0;
+        int surfaceColor = getContext().getColor(R.color.materialColorSurface);
+        int bgColor = (surfaceColor & 0x00FFFFFF) | 0x80000000;
         mAH.forEach(adapterHolder -> {
             adapterHolder.mPadding.top = padding;
             adapterHolder.applyPadding();
+            if (adapterHolder.mRecyclerView != null) {
+                android.graphics.drawable.GradientDrawable bg =
+                        new android.graphics.drawable.GradientDrawable();
+                bg.setColor(bgColor);
+                bg.setCornerRadii(new float[]{
+                        cornerRadiusPx, cornerRadiusPx,
+                        cornerRadiusPx, cornerRadiusPx,
+                        0, 0, 0, 0});
+                adapterHolder.mRecyclerView.setBackground(bg);
+            }
             if (adapterHolder.mRecyclerView != null) {
                 adapterHolder.mRecyclerView.scrollToTop();
             }
@@ -839,14 +863,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     int getBottomSheetBackgroundColor() {
-        if (!Flags.allAppsBlur()) {
-            return mBottomSheetBackgroundColorLegacy;
-        }
-        if (!mActivityContext.isAllAppsBackgroundBlurEnabled()) {
-            // Don't apply any alpha if the blur is disabled.
-            return mBottomSheetBackgroundColorBlurFallback;
-        }
-        return mBottomSheetBackgroundColorOverBlur;
+        // Transparent — the blur behind the all-apps sheet provides the backdrop.
+        return Color.TRANSPARENT;
     }
 
     boolean isBackgroundBlurEnabled() {
@@ -918,10 +936,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         }
 
         RelativeLayout.LayoutParams layoutParams = (LayoutParams) v.getLayoutParams();
-        layoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.search_container_all_apps);
+        layoutParams.addRule(RelativeLayout.BELOW, R.id.search_container_all_apps);
 
-        int topMargin = getContext().getResources().getDimensionPixelSize(
-                R.dimen.all_apps_header_top_margin);
+        int topMargin = 0;
         if (includeTabsMargin) {
             topMargin += getContext().getResources().getDimensionPixelSize(
                     R.dimen.all_apps_header_pill_height);
@@ -1463,7 +1480,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         final float horizontalScaleOffset = (1 - scale) * panel.getWidth() / 2;
         final float verticalScaleOffset = (1 - scale) * (panel.getHeight() - getHeight() / 2);
-        // Left and right insets can be applied to this container, as well as the panel.
         float left = getLeft() + panel.getLeft();
         float right = left + panel.getWidth();
 
@@ -1472,24 +1488,38 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         final float leftWithScale = left + horizontalScaleOffset;
         final float rightWithScale = right - horizontalScaleOffset;
         final float bottomWithOffset = panel.getBottom() + bottomOffsetPx;
-        // Draw full background panel if presenting on a sheet.
+
         int bottomSheetBackgroundColor = getBottomSheetBackgroundColor();
         float bottomSheetBackgroundAlpha = Color.alpha(bottomSheetBackgroundColor) / 255.0f;
-        if (hasBottomSheet) {
-            mHeaderPaint.setColor(bottomSheetBackgroundColor);
-            mHeaderPaint.setAlpha((int) (bottomSheetBackgroundAlpha * 255));
 
-            mTmpRectF.set(
-                    leftWithScale,
-                    topWithScale,
-                    rightWithScale,
-                    bottomWithOffset);
+        if (hasBottomSheet) {
+            // Compute animated corner radius based on transition progress.
+            // progress=0 → fully open → screen corner radius
+            // progress=1 → fully hidden → max corner radius
+            float progress = mAllAppsTransitionController != null
+                    ? mAllAppsTransitionController.getProgress() : 0f;
+            float cornerRadius = mScreenCornerRadius
+                    + (mMaxCornerRadius - mScreenCornerRadius) * progress;
+            mBottomSheetCornerRadii[0] = cornerRadius;
+            mBottomSheetCornerRadii[1] = cornerRadius;
+            mBottomSheetCornerRadii[2] = cornerRadius;
+            mBottomSheetCornerRadii[3] = cornerRadius;
+
+            mTmpRectF.set(leftWithScale, topWithScale, rightWithScale, bottomWithOffset);
             mTmpPath.reset();
             mTmpPath.addRoundRect(mTmpRectF, mBottomSheetCornerRadii, Direction.CW);
+            mHeaderPaint.setColor(bottomSheetBackgroundColor);
+            mHeaderPaint.setAlpha((int) (bottomSheetBackgroundAlpha * 255));
+            mHeaderPaint.setStyle(Paint.Style.FILL);
             canvas.drawPath(mTmpPath, mHeaderPaint);
 
-            // When the background panel is blurred (or fallback), we don't add header protection.
-            // TODO (b/414671116): Apply header protection whenever search bar is focused.
+            // Update highlight border with animated corner radius
+            float strokeWidth = getResources().getDisplayMetrics().density;
+            mHighlightBorder.update(cornerRadius, strokeWidth);
+            if (mBottomSheetBackground.getForeground() != mHighlightBorder) {
+                mBottomSheetBackground.setForeground(mHighlightBorder);
+            }
+
             if (Flags.allAppsBlur()) {
                 return;
             }
@@ -1708,6 +1738,61 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         private boolean isMain() {
             return mType == MAIN;
+        }
+    }
+
+    private static class HighlightBorderDrawable extends Drawable {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path path = new Path();
+        private final RectF rect = new RectF();
+        private final float[] radii = new float[8];
+        private float cornerRadius;
+        private boolean dirty = true;
+
+        HighlightBorderDrawable() {
+            paint.setStyle(Paint.Style.STROKE);
+        }
+
+        void update(float radius, float strokeWidth) {
+            if (radius != cornerRadius || paint.getStrokeWidth() != strokeWidth) {
+                cornerRadius = radius;
+                paint.setStrokeWidth(strokeWidth);
+                dirty = true;
+                invalidateSelf();
+            }
+        }
+
+        private void rebuild() {
+            Rect b = getBounds();
+            float inset = paint.getStrokeWidth() / 2f;
+            rect.set(b.left + inset, b.top + inset + 1, b.right - inset, b.bottom - inset);
+            radii[0] = cornerRadius; radii[1] = cornerRadius;
+            radii[2] = cornerRadius; radii[3] = cornerRadius;
+            path.reset();
+            path.addRoundRect(rect, radii, Path.Direction.CW);
+            paint.setShader(new android.graphics.LinearGradient(
+                    0f, b.top,
+                    0f, b.top + cornerRadius * 2f,
+                    0x4DFFFFFF, 0x4D000000,
+                    android.graphics.Shader.TileMode.CLAMP));
+            dirty = false;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (dirty) rebuild();
+            canvas.drawPath(path, paint);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {}
+
+        @Override
+        public void setColorFilter(android.graphics.ColorFilter colorFilter) {}
+
+        @Override
+        public int getOpacity() {
+            return android.graphics.PixelFormat.TRANSLUCENT;
         }
     }
 }
