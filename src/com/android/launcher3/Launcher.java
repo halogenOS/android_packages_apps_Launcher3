@@ -312,8 +312,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private static final int ON_ACTIVITY_RESULT_ANIMATION_DELAY = 500;
 
-    private static final String KEY_DARK_STATUS_BAR = "pref_dark_status_bar";
-
     // How long to wait before the new-shortcut animation automatically pans the workspace
     @VisibleForTesting public static final int NEW_APPS_PAGE_MOVE_DELAY = 500;
     private static final int NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS = 5;
@@ -530,9 +528,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         // Listen for screen turning off
         ScreenOnTracker.INSTANCE.get(this).addListener(mScreenOnListener);
-        getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
-                Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText)
-                || mSharedPrefs.getBoolean(KEY_DARK_STATUS_BAR, false));
+
+        // Detect wallpaper luminance behind system bars to set icon color.
+        getWindow().getDecorView().post(this::updateSystemBarIconColors);
 
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -637,9 +635,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences SharedPrefs, String key) {
-        if (key.equals(KEY_DARK_STATUS_BAR)) {
-            recreate();
-        }
     }
 
     @Override
@@ -1721,6 +1716,101 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Captures the display and samples the system bar areas to determine
+     * whether status/nav bar icons should be light or dark.
+     * Uses median OKLCH L of sampled pixels.
+     */
+    private void updateSystemBarIconColors() {
+        android.view.View decor = getWindow().getDecorView();
+        android.view.SurfaceControl sc = decor.getViewRootImpl() != null
+                ? decor.getViewRootImpl().getSurfaceControl() : null;
+        if (sc == null || !sc.isValid()) return;
+        if (getDisplay() == null) return;
+
+        android.window.ScreenCaptureInternal.CaptureArgs args =
+                new android.window.ScreenCaptureInternal.CaptureArgs.Builder<>()
+                        .setExcludeLayers(new android.view.SurfaceControl[]{sc})
+                        .build();
+        android.view.WindowInsets insets = decor.getRootWindowInsets();
+        final int statusH = insets != null
+                ? insets.getInsets(android.view.WindowInsets.Type.statusBars()).top : 0;
+        final int navH = insets != null
+                ? insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom : 0;
+
+        android.window.ScreenCaptureInternal.ScreenCaptureListener listener =
+                new android.window.ScreenCaptureInternal.ScreenCaptureListener((result, status) -> {
+                    com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR.execute(() -> {
+                        if (result == null) return;
+                        android.hardware.HardwareBuffer buffer = result.getHardwareBuffer();
+                        if (buffer == null) return;
+                        android.graphics.Bitmap bmp = android.graphics.Bitmap.wrapHardwareBuffer(
+                                buffer, result.getColorSpace());
+                        buffer.close();
+                        if (bmp == null) return;
+                        android.graphics.Bitmap sw = bmp.copy(
+                                android.graphics.Bitmap.Config.ARGB_8888, false);
+                        bmp.recycle();
+                        if (sw == null) return;
+
+                        int flags = 0;
+                        if (statusH > 0 && !isAreaDark(sw, statusH, statusH))
+                            flags |= SystemUiController.FLAG_LIGHT_STATUS;
+                        else
+                            flags |= SystemUiController.FLAG_DARK_STATUS;
+                        if (navH > 0 && !isAreaDark(sw,
+                                sw.getHeight() - navH - navH, navH))
+                            flags |= SystemUiController.FLAG_LIGHT_NAV;
+                        else
+                            flags |= SystemUiController.FLAG_DARK_NAV;
+                        sw.recycle();
+
+                        final int f = flags;
+                        runOnUiThread(() -> getSystemUiController().updateUiState(
+                                SystemUiController.UI_STATE_BASE_WINDOW, f));
+                    });
+                });
+
+        try {
+            android.view.WindowManagerGlobal.getWindowManagerService()
+                    .captureDisplay(getDisplay().getDisplayId(), args, listener);
+        } catch (android.os.RemoteException e) {
+            android.util.Log.e(TAG, "captureDisplay failed for system bar colors", e);
+        }
+    }
+
+    private static boolean isAreaDark(android.graphics.Bitmap bmp, int startY, int height) {
+        int endY = Math.min(startY + height, bmp.getHeight());
+        int w = bmp.getWidth();
+        float[] lValues = new float[(w / 4 + 1) * (height / 4 + 1)];
+        int count = 0;
+        for (int y = startY; y < endY; y += 4) {
+            for (int x = 0; x < w; x += 4) {
+                int px = bmp.getPixel(x, y);
+                float r = srgbToLinear(((px >> 16) & 0xFF) / 255f);
+                float g = srgbToLinear(((px >> 8) & 0xFF) / 255f);
+                float b = srgbToLinear((px & 0xFF) / 255f);
+                float l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b;
+                float m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b;
+                float s = 0.0883024619f * r + 0.2220049174f * g + 0.6896926208f * b;
+                float l_ = (float) Math.cbrt(Math.max(l, 0));
+                float m_ = (float) Math.cbrt(Math.max(m, 0));
+                float s_ = (float) Math.cbrt(Math.max(s, 0));
+                float L = 0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_;
+                if (count < lValues.length) lValues[count++] = L;
+            }
+        }
+        if (count == 0) return false;
+        java.util.Arrays.sort(lValues, 0, count);
+        return lValues[count / 2] < 0.5f;
+    }
+
+    private static float srgbToLinear(float c) {
+        return c <= 0.04045f
+                ? c / 12.92f
+                : (float) Math.pow((c + 0.055f) / 1.055f, 2.4);
     }
 
     @Override
