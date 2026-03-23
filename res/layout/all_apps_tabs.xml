@@ -21,12 +21,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal|top"
-    android:layout_marginTop="@dimen/all_apps_header_pill_height"
+    android:layout_marginTop="0dp"
     android:clipChildren="true"
     android:clipToOutline="true"
     android:clipToPadding="false"
     android:descendantFocusability="afterDescendants"
-    android:paddingTop="4dp"
+    android:paddingTop="0dp"
     launcher:pageIndicator="@+id/tabs" >
 
     <include layout="@layout/all_apps_rv_layout" />

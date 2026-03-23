@@ -76,16 +76,36 @@ public class AppsSearchContainerLayout extends ExtendedEditText
 
         mSearchQueryBuilder = new SpannableStringBuilder();
         Selection.setSelection(mSearchQueryBuilder, 0);
-        // Semi-transparent M3E background with rounded corners and outline
+        // M3E background with rounded corners and outline.
+        // Semi-transparent over blur, opaque when blur is unavailable.
         int surfaceColor = context.getColor(com.android.launcher3.R.color.materialColorSurface);
-        int bgColor = (surfaceColor & 0x00FFFFFF) | 0x80000000;
+        boolean blurEnabled = com.android.launcher3.Flags.allAppsBlur()
+                && android.view.CrossWindowBlurListeners.getInstance()
+                        .isCrossWindowBlurEnabled();
+        int bgColor = blurEnabled
+                ? (surfaceColor & 0x00FFFFFF) | 0x80000000
+                : context.getColor(com.android.launcher3.R.color.materialColorSurfaceContainer);
         float density = getResources().getDisplayMetrics().density;
         android.graphics.drawable.GradientDrawable searchBg =
                 new android.graphics.drawable.GradientDrawable();
         searchBg.setColor(bgColor);
         searchBg.setCornerRadius(13f * density);
-        searchBg.setStroke((int) density, 0x40FFFFFF);
+        if (blurEnabled) {
+            searchBg.setStroke((int) density, 0x40FFFFFF);
+        } else {
+            searchBg.setStroke((int) density,
+                    context.getColor(com.android.launcher3.R.color.materialColorOutlineVariant));
+        }
         setBackground(searchBg);
+
+        // Lighter variant of the material primary color for the caret
+        int primaryColor = context.getColor(
+                com.android.launcher3.R.color.materialColorPrimaryContainer);
+        android.graphics.drawable.GradientDrawable cursor =
+                new android.graphics.drawable.GradientDrawable();
+        cursor.setColor(primaryColor);
+        cursor.setSize((int) (2f * density), 0);
+        setTextCursorDrawable(cursor);
 
         mContentOverlap =
                 getResources().getDimensionPixelSize(R.dimen.all_apps_search_bar_content_overlap);
@@ -133,7 +153,7 @@ public class AppsSearchContainerLayout extends ExtendedEditText
         int shift = expectedLeft - left;
         setTranslationX(shift);
 
-        offsetTopAndBottom(mContentOverlap);
+        // Content overlap removed — positioning is handled by RelativeLayout rules
     }
 
     @Override
@@ -191,10 +211,10 @@ public class AppsSearchContainerLayout extends ExtendedEditText
 
     @Override
     public void setInsets(Rect insets) {
-        MarginLayoutParams mlp = (MarginLayoutParams) getLayoutParams();
-        mlp.topMargin = insets.top;
-        requestLayout();
+        // Top margin is controlled by ActivityAllAppsContainerView.setInsets
+        // based on the handle pill position.
     }
+
 
     @Override
     public ExtendedEditText getEditText() {

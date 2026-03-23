@@ -202,6 +202,11 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        return new ScrimColors(Color.TRANSPARENT, Color.TRANSPARENT);
+        if (launcher.getAppsView().isBackgroundBlurEnabled()) {
+            return new ScrimColors(Color.TRANSPARENT, Color.TRANSPARENT);
+        }
+        // Without blur, use an opaque scrim so the wallpaper isn't visible behind the sheet.
+        int scrimColor = launcher.getResources().getColor(R.color.materialColorSurface);
+        return new ScrimColors(scrimColor, Color.TRANSPARENT);
     }
 }

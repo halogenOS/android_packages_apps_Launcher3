@@ -286,10 +286,6 @@ public class FloatingHeaderView extends LinearLayout implements
             return;
         }
         mMaxTranslation += mFloatingRowsHeight;
-        if (!mTabsHidden) {
-            mMaxTranslation += mTabsAdditionalPaddingBottom
-                    + getResources().getDimensionPixelSize(R.dimen.all_apps_tabs_margin_top);
-        }
     }
 
     int getMaxTranslation() {
@@ -345,7 +341,8 @@ public class FloatingHeaderView extends LinearLayout implements
             }
         }
 
-        mTabLayout.setTranslationY(mTranslationY);
+        // Tabs stay fixed — don't translate with scroll
+        mTabLayout.setTranslationY(0);
 
         int clipTop = getPaddingTop() - mTabsAdditionalPaddingTop;
         if (mTabsHidden) {
@@ -356,14 +353,17 @@ public class FloatingHeaderView extends LinearLayout implements
         mHeaderClip.top = clipTop;
         // clipping on a draw might cause additional redraw
         setClipBounds(mHeaderClip);
+        // Clip RV content so scrolled items don't show behind the search bar,
+        // but use top=0 so the rounded background corners remain visible.
+        mRVClip.top = 0;
         if (mMainRV != null) {
-            mMainRV.setClipBounds(null);
+            mMainRV.setClipBounds(mRVClip);
         }
         if (mWorkRV != null) {
-            mWorkRV.setClipBounds(null);
+            mWorkRV.setClipBounds(mRVClip);
         }
         if (mSearchRV != null) {
-            mSearchRV.setClipBounds(null);
+            mSearchRV.setClipBounds(mRVClip);
         }
     }
 

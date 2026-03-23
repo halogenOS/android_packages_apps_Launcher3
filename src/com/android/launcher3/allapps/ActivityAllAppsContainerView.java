@@ -189,6 +189,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     private float mScreenCornerRadius;
     private float mMaxCornerRadius;
     private final HighlightBorderDrawable mHighlightBorder = new HighlightBorderDrawable();
+    private int mElementSpacing;
 
     public ActivityAllAppsContainerView(Context context) {
         this(context, null);
@@ -272,8 +273,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         mHeader = findViewById(R.id.all_apps_header);
         mAdditionalHeaderRows.clear();
         mAdditionalHeaderRows.addAll(getAdditionalHeaderRows());
-        mBottomSheetBackground = findViewById(R.id.bottom_sheet_background);
-        mBottomSheetHandleArea = findViewById(R.id.bottom_sheet_handle_area);
+        mBottomSheetBackground = this;
         mSearchRecyclerView = findViewById(R.id.search_results_list_view);
         mFastScroller = findViewById(R.id.fast_scroller);
         mFastScroller.setPopupView(findViewById(R.id.fast_scroller_popup));
@@ -445,7 +445,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         // IF the MotionEvent is inside the search box or handle area, and the container keeps on
         // receiving touch input, container should move down.
         if (dragLayer.isEventOverView(mSearchContainer, ev)
-                || dragLayer.isEventOverView(mBottomSheetHandleArea, ev)) {
+                || dragLayer.isEventOverView(findViewById(R.id.bottom_sheet_handle), ev)) {
             return true;
         }
         AllAppsRecyclerView rv = getActiveRecyclerView();
@@ -742,13 +742,21 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             mViewPager = null;
         }
 
-        // Position the RV below the header so the rounded top corners
-        // are visible above the first row of icons.
+        // Position the RV below the header (with tabs) or search bar (without)
         if (rvContainer.getLayoutParams() instanceof RelativeLayout.LayoutParams rlp) {
-            rlp.addRule(RelativeLayout.BELOW, R.id.all_apps_header);
-            rlp.topMargin = mUsingTabs ? 0
-                    : (int) (24f * getResources().getDisplayMetrics().density);
+            rlp.addRule(RelativeLayout.BELOW,
+                    showTabs ? R.id.all_apps_header : R.id.search_container_all_apps);
+            rlp.topMargin = mElementSpacing;
             rvContainer.setLayoutParams(rlp);
+        }
+
+        // Position the search results RV below the search bar
+        View searchRV = getSearchRecyclerView();
+        if (searchRV != null
+                && searchRV.getLayoutParams() instanceof RelativeLayout.LayoutParams srlp) {
+            srlp.addRule(RelativeLayout.BELOW, R.id.search_container_all_apps);
+            srlp.topMargin = 0;
+            searchRV.setLayoutParams(srlp);
         }
 
         updateSearchResultsVisibility();
@@ -766,10 +774,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 getCurrentPage(),
                 tabsHidden);
 
-        int cornerRadiusPx = (int) (28f * getResources().getDisplayMetrics().density);
+        int minRadius = (int) (28f * getResources().getDisplayMetrics().density);
+        int cornerRadiusPx = Math.max(minRadius, (int) mScreenCornerRadius);
         int padding = 0;
         int surfaceColor = getContext().getColor(R.color.materialColorSurface);
-        int bgColor = (surfaceColor & 0x00FFFFFF) | 0x80000000;
+        int bgColor = isBackgroundBlurEnabled()
+                ? (surfaceColor & 0x00FFFFFF) | 0x80000000
+                : getContext().getColor(R.color.materialColorSurfaceDim);
         mAH.forEach(adapterHolder -> {
             adapterHolder.mPadding.top = padding;
             adapterHolder.applyPadding();
@@ -795,6 +806,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         } else {
             layoutBelowSearchContainer(mHeader, false /* includeTabsMargin */);
         }
+
     }
 
     /**
@@ -863,11 +875,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     int getBottomSheetBackgroundColor() {
-        // Transparent — the blur behind the all-apps sheet provides the backdrop.
-        return Color.TRANSPARENT;
+        if (isBackgroundBlurEnabled()) {
+            return Color.TRANSPARENT;
+        }
+        return getContext().getColor(R.color.materialColorSurface);
     }
 
-    boolean isBackgroundBlurEnabled() {
+    public boolean isBackgroundBlurEnabled() {
         return Flags.allAppsBlur() && mActivityContext.isAllAppsBackgroundBlurEnabled();
     }
 
@@ -938,12 +952,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         RelativeLayout.LayoutParams layoutParams = (LayoutParams) v.getLayoutParams();
         layoutParams.addRule(RelativeLayout.BELOW, R.id.search_container_all_apps);
 
-        int topMargin = 0;
-        if (includeTabsMargin) {
-            topMargin += getContext().getResources().getDimensionPixelSize(
-                    R.dimen.all_apps_header_pill_height);
-        }
-        layoutParams.topMargin = topMargin;
+        layoutParams.topMargin = mUsingTabs ? mElementSpacing : 0;
     }
 
     private void alignParentTop(View v, boolean includeTabsMargin) {
@@ -1062,11 +1071,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     protected void updateBackgroundVisibility(DeviceProfile deviceProfile) {
-        mBottomSheetBackground.setVisibility(
-                deviceProfile.shouldShowAllAppsOnSheet() ? View.VISIBLE : View.GONE);
-        // Note: The opaque sheet background and header protection are added in drawOnScrim.
-        // For the taskbar entrypoint, the scrim is drawn by its abstract slide in view container,
-        // so its header protection is derived from this scrim instead.
     }
 
     @VisibleForTesting
@@ -1226,25 +1230,63 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         }
         setLayoutParams(mlp);
 
-        if (!grid.isVerticalBarLayout() || FeatureFlags.enableResponsiveWorkspace()) {
-            int topPadding = grid.allAppsPadding.top;
-            if (isSearchBarFloating() && !grid.shouldShowAllAppsOnSheet()) {
-                topPadding += getResources().getDimensionPixelSize(
-                        R.dimen.all_apps_additional_top_padding_floating_search);
-            }
-            setPadding(grid.allAppsLeftRightMargin, topPadding, grid.allAppsLeftRightMargin, 0);
-        }
+        setPadding(grid.allAppsLeftRightMargin, 0, grid.allAppsLeftRightMargin, 0);
+
         View handle = findViewById(R.id.bottom_sheet_handle);
         if (handle != null) {
-            MarginLayoutParams hlp = (MarginLayoutParams) handle.getLayoutParams();
-            hlp.topMargin = insets.top;
-            handle.setLayoutParams(hlp);
-        }
-        if (mBottomSheetHandleArea != null) {
-            mBottomSheetHandleArea.getLayoutParams().height = insets.top
-                    + getResources().getDimensionPixelSize(
-                            R.dimen.bottom_sheet_handle_area_height);
-            mBottomSheetHandleArea.requestLayout();
+            int handleHeight = handle.getLayoutParams().height;
+            // Spacing = half status bar height, used for all gaps
+            mElementSpacing = Math.max(0, (insets.top - handleHeight) / 2);
+
+            // Detect centered punch hole cutout
+            int cutoutOffset = 0;
+            android.view.DisplayCutout cutout = getRootWindowInsets() != null
+                    ? getRootWindowInsets().getDisplayCutout() : null;
+            if (cutout != null) {
+                int screenCenterX = getResources().getDisplayMetrics().widthPixels / 2;
+                for (android.graphics.Rect bound : cutout.getBoundingRects()) {
+                    if (bound.top == 0
+                            && Math.abs(bound.centerX() - screenCenterX) < bound.width()) {
+                        cutoutOffset = bound.bottom;
+                        break;
+                    }
+                }
+            }
+
+            // Pill: centered in status bar, or spacing below cutout
+            if (handle.getLayoutParams() instanceof RelativeLayout.LayoutParams hlp) {
+                hlp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                hlp.topMargin = cutoutOffset + mElementSpacing;
+                handle.setLayoutParams(hlp);
+            }
+
+            // Search bar: BELOW pill, same spacing
+            if (mSearchContainer != null
+                    && mSearchContainer.getLayoutParams() instanceof RelativeLayout.LayoutParams srlp) {
+                srlp.addRule(RelativeLayout.BELOW, R.id.bottom_sheet_handle);
+                srlp.topMargin = mElementSpacing;
+                mSearchContainer.setLayoutParams(srlp);
+            }
+
+            // Search results: same position as app list
+            if (mSearchRecyclerView != null
+                    && mSearchRecyclerView.getLayoutParams()
+                            instanceof RelativeLayout.LayoutParams srlp) {
+                srlp.addRule(RelativeLayout.BELOW,
+                        mUsingTabs ? R.id.all_apps_header : R.id.search_container_all_apps);
+                srlp.topMargin = mElementSpacing;
+                mSearchRecyclerView.setLayoutParams(srlp);
+            }
+
+            // App list: update margin now that mElementSpacing is calculated
+            View rvContainer = getAppsRecyclerViewContainer();
+            if (rvContainer != null
+                    && rvContainer.getLayoutParams() instanceof RelativeLayout.LayoutParams rlp) {
+                rlp.addRule(RelativeLayout.BELOW,
+                        mUsingTabs ? R.id.all_apps_header : R.id.search_container_all_apps);
+                rlp.topMargin = mElementSpacing;
+                rvContainer.setLayoutParams(rlp);
+            }
         }
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
