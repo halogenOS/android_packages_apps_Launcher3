@@ -726,6 +726,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 RecentsView rv = getOverviewPanel();
                 sendCustomAccessibilityEvent(
                         rv.getPageAt(rv.getCurrentPage()), TYPE_VIEW_FOCUSED, null);
+                getWindow().getDecorView().post(this::updateSystemBarIconColors);
                 break;
             }
             case QUICK_SWITCH_STATE_ORDINAL: {
@@ -925,6 +926,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         if (mTaskbarInteractor != null) {
             mTaskbarInteractor.onStateTransitionCompletedAfterSwipeToHome(finalState);
         }
+        getWindow().getDecorView().post(this::updateSystemBarIconColors);
     }
 
     @Override

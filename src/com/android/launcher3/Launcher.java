@@ -530,7 +530,9 @@ public class Launcher extends StatefulActivity<LauncherState>
         ScreenOnTracker.INSTANCE.get(this).addListener(mScreenOnListener);
 
         // Detect wallpaper luminance behind system bars to set icon color.
+        // Post twice: once immediately, once delayed for after boot wallpaper rendering.
         getWindow().getDecorView().post(this::updateSystemBarIconColors);
+        getWindow().getDecorView().postDelayed(this::updateSystemBarIconColors, 1000);
 
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -1193,6 +1195,10 @@ public class Launcher extends StatefulActivity<LauncherState>
             mAllAppsSessionLogId = null;
         }
         setTitle(state);
+
+        if (ALL_APPS.equals(state) || NORMAL.equals(state)) {
+            getWindow().getDecorView().post(this::updateSystemBarIconColors);
+        }
     }
 
     protected void setTitle(@NonNull LauncherState state) {
@@ -1723,7 +1729,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      * whether status/nav bar icons should be light or dark.
      * Uses median OKLCH L of sampled pixels.
      */
-    private void updateSystemBarIconColors() {
+    protected void updateSystemBarIconColors() {
         android.view.View decor = getWindow().getDecorView();
         android.view.SurfaceControl sc = decor.getViewRootImpl() != null
                 ? decor.getViewRootImpl().getSurfaceControl() : null;
