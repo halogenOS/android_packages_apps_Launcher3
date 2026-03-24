@@ -793,6 +793,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                         cornerRadiusPx, cornerRadiusPx,
                         0, 0, 0, 0});
                 adapterHolder.mRecyclerView.setBackground(bg);
+                adapterHolder.mRecyclerView.setClipToOutline(true);
             }
             if (adapterHolder.mRecyclerView != null) {
                 adapterHolder.mRecyclerView.scrollToTop();
