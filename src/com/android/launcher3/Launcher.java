@@ -1730,6 +1730,10 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Uses median OKLCH L of sampled pixels.
      */
     protected void updateSystemBarIconColors() {
+        updateSystemBarIconColors(false);
+    }
+
+    private void updateSystemBarIconColors(boolean isSettling) {
         android.view.View decor = getWindow().getDecorView();
         android.view.SurfaceControl sc = decor.getViewRootImpl() != null
                 ? decor.getViewRootImpl().getSurfaceControl() : null;
@@ -1774,8 +1778,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                         sw.recycle();
 
                         final int f = flags;
-                        runOnUiThread(() -> getSystemUiController().updateUiState(
-                                SystemUiController.UI_STATE_BASE_WINDOW, f));
+                        runOnUiThread(() -> {
+                            getSystemUiController().updateUiState(
+                                    SystemUiController.UI_STATE_BASE_WINDOW, f);
+                            if (!isSettling) {
+                                getWindow().getDecorView().postDelayed(
+                                        () -> updateSystemBarIconColors(true), 500);
+                            }
+                        });
                     });
                 });
 
@@ -3173,6 +3183,14 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onTopResumedActivityChanged(boolean isResumed) {
         mIsTopResumedActivity = isResumed;
         mLauncherUiState.setIsTopResumedActivity(isResumed);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            getWindow().getDecorView().post(this::updateSystemBarIconColors);
+        }
     }
 
 
