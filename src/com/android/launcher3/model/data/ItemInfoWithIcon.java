@@ -341,7 +341,6 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
      */
     public boolean supportsCustomShapes(@DrawableCreationFlags int creationFlags) {
         return Flags.enableLauncherIconShapes()
-                && (creationFlags & FLAG_THEMED) != 0
                 && bitmap.isFullBleed();
     }
 
