@@ -82,6 +82,14 @@ constructor(
     val isIconThemeEnabled
         get() = themeController != null
 
+    val isDrawerThemeEnabled
+        get() = prefs.get(PREF_THEMED_ICONS_IN_DRAWER)
+
+    fun setDrawerThemeEnabled(enabled: Boolean) {
+        prefs.put(PREF_THEMED_ICONS_IN_DRAWER, enabled)
+        listeners.forEach { it.onThemeChanged() }
+    }
+
     val iconShape
         get() = iconState.iconShape
 
@@ -214,6 +222,7 @@ constructor(
 
         @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getThemeManager)
         @JvmField val PREF_ICON_SHAPE = backedUpItem("icon_shape_model", "")
+        @JvmField val PREF_THEMED_ICONS_IN_DRAWER = backedUpItem("themed_icons_in_drawer", false)
 
         @JvmField val DEFAULT_SHAPE_DELEGATE = pickBestShape(shapeStr = "")
 

@@ -133,6 +133,7 @@ public class GridCustomizationsProxy implements ProxyProvider {
     private static final String GET_ICON_THEMED = "/get_icon_themed";
     private static final String SET_ICON_THEMED = "/set_icon_themed";
     public static final String ICON_THEMED = "/icon_themed";
+    public static final String ICON_THEMED_IN_DRAWER = "/icon_themed_in_drawer";
     public static final String BOOLEAN_VALUE = "boolean_value";
 
     private static final String KEY_SURFACE_PACKAGE = "surface_package";
@@ -153,6 +154,7 @@ public class GridCustomizationsProxy implements ProxyProvider {
 
     private final Context mContext;
     private final ThemePreference mThemePreference;
+    private final ThemeManager mThemeManager;
     private final LauncherPrefs mPrefs;
     private final InvariantDeviceProfile mIdp;
 
@@ -160,12 +162,14 @@ public class GridCustomizationsProxy implements ProxyProvider {
     protected GridCustomizationsProxy(
             @ApplicationContext Context context,
             ThemePreference themePreference,
+            ThemeManager themeManager,
             LauncherPrefs prefs,
             InvariantDeviceProfile idp,
             DaggerSingletonTracker lifeCycle
     ) {
         mContext = context;
         mThemePreference = themePreference;
+        mThemeManager = themeManager;
         mPrefs = prefs;
         mIdp = idp;
         lifeCycle.addCloseable(() -> mActivePreviews.forEach(PreviewLifecycleObserver::binderDied));
@@ -259,6 +263,14 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 Log.d(TAG, "query: path=" + path + ", isMonoThemeEnabled=" + monoThemeEnabled);
                 return cursor;
             }
+            case ICON_THEMED_IN_DRAWER: {
+                MatrixCursor cursor = new MatrixCursor(new String[]{BOOLEAN_VALUE});
+                boolean drawerThemed = mThemeManager.isDrawerThemeEnabled();
+                cursor.newRow().add(BOOLEAN_VALUE, drawerThemed ? 1 : 0);
+                Log.d(TAG, "query: path=" + path
+                        + ", isDrawerThemeEnabled=" + drawerThemed);
+                return cursor;
+            }
             default: {
                 Log.d(TAG, "query: path=" + path + " not found, returning null.");
                 return null;
@@ -323,6 +335,10 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 } else {
                     mThemePreference.setValue(null, MONO_THEME_VALUE::equals);
                 }
+                return UPDATE_SETTING_SUCCESS;
+            }
+            case ICON_THEMED_IN_DRAWER: {
+                mThemeManager.setDrawerThemeEnabled(values.getAsBoolean(BOOLEAN_VALUE));
                 return UPDATE_SETTING_SUCCESS;
             }
             default:
