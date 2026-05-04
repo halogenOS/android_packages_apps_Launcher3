@@ -1519,7 +1519,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             Canvas canvas, float scale, @Px int bottomOffsetPx) {
         final View panel = mBottomSheetBackground;
         final boolean hasBottomSheet = panel.getVisibility() == VISIBLE;
-        final float translationY = ((View) panel.getParent()).getTranslationY();
+        final float translationY = panel == this
+                ? getTranslationY()
+                : ((View) panel.getParent()).getTranslationY();
 
         final float horizontalScaleOffset = (1 - scale) * panel.getWidth() / 2;
         final float verticalScaleOffset = (1 - scale) * (panel.getHeight() - getHeight() / 2);

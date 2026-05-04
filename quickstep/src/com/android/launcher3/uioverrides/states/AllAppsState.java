@@ -202,10 +202,15 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        if (launcher.getAppsView().isBackgroundBlurEnabled()) {
+        if (launcher.getAppsView().isBackgroundBlurEnabled()
+                || launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
+            // When showing on a sheet (phones), the panel background is drawn separately
+            // by ActivityAllAppsContainerView within the sheet bounds. Using a transparent
+            // scrim here prevents the full-screen ScrimView from turning black.
             return new ScrimColors(Color.TRANSPARENT, Color.TRANSPARENT);
         }
-        // Without blur, use an opaque scrim so the wallpaper isn't visible behind the sheet.
+        // Without blur on tablets (no sheet), use an opaque scrim so the wallpaper
+        // isn't visible behind the full-screen app list.
         int scrimColor = launcher.getResources().getColor(R.color.materialColorSurface);
         return new ScrimColors(scrimColor, Color.TRANSPARENT);
     }
