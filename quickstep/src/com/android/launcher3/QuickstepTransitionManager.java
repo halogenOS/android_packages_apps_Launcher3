@@ -207,12 +207,12 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      */
     public static final int STATUS_BAR_TRANSITION_PRE_DELAY = 96;
 
-    public static final long APP_LAUNCH_DURATION = 500;
+    public static final long APP_LAUNCH_DURATION = 400;
 
     private static final long APP_LAUNCH_ALPHA_DURATION = 50;
     private static final long APP_LAUNCH_ALPHA_START_DELAY = 25;
 
-    public static final int ANIMATION_NAV_FADE_IN_DURATION = 266;
+    public static final int ANIMATION_NAV_FADE_IN_DURATION = 213;
     public static final int ANIMATION_NAV_FADE_OUT_DURATION = 133;
     public static final long ANIMATION_DELAY_NAV_FADE_IN =
             APP_LAUNCH_DURATION - ANIMATION_NAV_FADE_IN_DURATION;
@@ -221,21 +221,21 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     public static final Interpolator NAV_FADE_OUT_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 1f, 1f);
 
-    public static final int RECENTS_LAUNCH_DURATION = 336;
+    public static final int RECENTS_LAUNCH_DURATION = 280;
     private static final int LAUNCHER_RESUME_START_DELAY = 100;
-    private static final int CLOSING_TRANSITION_DURATION_MS = 250;
-    public static final int SPLIT_LAUNCH_DURATION = 370;
+    private static final int CLOSING_TRANSITION_DURATION_MS = 200;
+    public static final int SPLIT_LAUNCH_DURATION = 300;
     public static final int SPLIT_DIVIDER_ANIM_DURATION = 100;
 
-    public static final int CONTENT_ALPHA_DURATION = 217;
-    public static final int TRANSIENT_TASKBAR_TRANSITION_DURATION = 417;
-    public static final int PINNED_TASKBAR_TRANSITION_DURATION = 600;
-    public static final int TASKBAR_TO_APP_DURATION = 600;
+    public static final int CONTENT_ALPHA_DURATION = 180;
+    public static final int TRANSIENT_TASKBAR_TRANSITION_DURATION = 330;
+    public static final int PINNED_TASKBAR_TRANSITION_DURATION = 480;
+    public static final int TASKBAR_TO_APP_DURATION = 480;
     // TODO(b/236145847): Tune TASKBAR_TO_HOME_DURATION to 383 after conflict with unlock animation
     // is solved.
     private static final int TASKBAR_TO_HOME_DURATION_FAST = 300;
     private static final int TASKBAR_TO_HOME_DURATION_SLOW = 1000;
-    protected static final int CONTENT_SCALE_DURATION = 350;
+    protected static final int CONTENT_SCALE_DURATION = 280;
 
     private static final int MAX_NUM_TASKS = 5;
 
